@@ -57,7 +57,7 @@ export default function App() {
         setTimeout(() => setShake(false), 500);
         return;
       }
-      chrome.storage.local.set({ accountToken: data.account_token }, () => {
+      chrome.storage.local.set({ jwt: data.account_token }, () => {
         window.close();
       });
     } catch {

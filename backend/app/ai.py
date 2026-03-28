@@ -1,16 +1,17 @@
 import json
 import os
-
+from dotenv import load_dotenv
 from fastapi import APIRouter, Header, HTTPException
 from openai import OpenAI
 
 from db import get_user_by_account_token, save_permit_request
 from models import PermitExceptionRequest, PermitExceptionResponse
 
+load_dotenv()
+
 router = APIRouter()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 
 def extract_account_token(authorization: str | None) -> str:
     if not authorization:
