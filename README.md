@@ -6,4 +6,3 @@ The dream was to get a j*b.
 To find someone who believed in that dream with us.
 We chose to do this the only way we knew how.
 With the power of **friendship**.
-3 Aaravs, 1 Abhiram, and the GOAT of the GOATS: Sahil
