@@ -13,7 +13,7 @@ function getDomain(url) {
   catch { return url; }
 }
 
-// Floating background particles
+
 function Particles() {
   const particles = [
     { size: 200, x: 10, y: 20, delay: 0 },
@@ -48,7 +48,7 @@ export default function BlockedPage() {
   const domain = getDomain(url);
   const [session, setSession] = useState(null);
   const [now, setNow] = useState(Date.now());
-  const [view, setView] = useState('blocked'); // blocked | form | judging | approved | denied
+  const [view, setView] = useState('blocked'); 
   const [requestUrl, setRequestUrl] = useState(url);
   const [reason, setReason] = useState('');
   const [verdict, setVerdict] = useState(null);
@@ -91,12 +91,12 @@ export default function BlockedPage() {
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden px-4">
       <Particles />
 
-      {/* Content card */}
+      
       <div className="relative z-10 w-full max-w-lg">
-        {/* ── Blocked state ── */}
+        
         {view === 'blocked' && (
           <div className="text-center animate-fade-in">
-            {/* Icon */}
+            
             <div className="flex justify-center mb-8">
               <div
                 className="w-24 h-24 rounded-3xl flex items-center justify-center animate-glow animate-float"
@@ -109,14 +109,14 @@ export default function BlockedPage() {
             <h1 className="text-5xl font-black text-white tracking-tight mb-3">Blocked.</h1>
             <p className="text-xl text-gray-400 mb-2">You're locked in right now.</p>
 
-            {/* Blocked domain badge */}
+            
             <div className="inline-flex items-center gap-2 bg-red-900/30 border border-red-800/40 rounded-full px-4 py-2 mb-8">
               <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px #ef4444' }} />
               <span className="text-red-400 font-mono text-sm">{domain}</span>
               <span className="text-red-600/60 text-xs">is blocked</span>
             </div>
 
-            {/* Session info */}
+            
             {session && (
               <div className="bg-black/30 rounded-2xl border border-red-500/30 p-6 mb-6 text-left">
                 <div className="flex items-start justify-between mb-4">
@@ -139,7 +139,7 @@ export default function BlockedPage() {
               </div>
             )}
 
-            {/* Actions */}
+            
             <div className="space-y-3">
               <button
                 onClick={() => setView('form')}
@@ -159,7 +159,7 @@ export default function BlockedPage() {
           </div>
         )}
 
-        {/* ── Request form ── */}
+        
         {view === 'form' && (
           <div className="animate-fade-in">
             <button
@@ -221,7 +221,7 @@ export default function BlockedPage() {
           </div>
         )}
 
-        {/* ── Judging ── */}
+        
         {view === 'judging' && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div className="w-20 h-20 rounded-full bg-amber-900/30 border-2 border-amber-700/50 flex items-center justify-center">
@@ -234,7 +234,7 @@ export default function BlockedPage() {
           </div>
         )}
 
-        {/* ── Approved ── */}
+        
         {view === 'approved' && verdict && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div
@@ -257,7 +257,7 @@ export default function BlockedPage() {
           </div>
         )}
 
-        {/* ── Denied ── */}
+        
         {view === 'denied' && verdict && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div
@@ -290,7 +290,7 @@ export default function BlockedPage() {
         )}
       </div>
 
-      {/* Bottom branding */}
+      
       <div className="fixed bottom-6 flex items-center gap-1.5 text-gray-600 text-xs">
         <Lock size={12} />
         Warden — Stay focused. Stay honest.

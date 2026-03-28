@@ -1,36 +1,14 @@
-/**
- * AI backend abstraction.
- *
- * Supported providers:
- *   • Ollama  — fully local, no API key, requires Ollama running on your machine
- *   • Groq    — free-tier cloud API (generous rate limits), free key at console.groq.com
- *
- * All HTTP requests are delegated to the background service worker via
- * chrome.runtime.sendMessage so that Chrome's host_permissions bypass Ollama's
- * CORS restriction (chrome-extension:// origin is not in Ollama's default allowlist).
- */
-import { getSettings } from './storage';
-
-async function getConfig() {
-  const s = (await getSettings()) || {};
-  return {
-    provider:    s.aiProvider    || 'ollama',
-    ollamaUrl:   s.ollamaUrl     || 'http://localhost:11434',
-    ollamaModel: s.ollamaModel   || 'llama3.2',
-    groqApiKey:  s.groqApiKey    || '',
-    groqModel:   s.groqModel     || 'llama-3.3-70b-versatile',
-  };
-}
-
-// Delegate the actual HTTP call to the service worker (bypasses CORS)
 async function call(system, userMsg) {
-  const cfg = await getConfig();
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(
-      { type: 'CALL_AI', system, userMsg, ...cfg },
+      { type: 'CALL_AI', system, userMsg },
       (res) => {
-        if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
-        if (res?.error) return reject(new Error(res.error));
+        if (chrome.runtime.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message));
+        }
+        if (res?.error) {
+          return reject(new Error(res.error));
+        }
         resolve(res.text || '');
       }
     );
@@ -43,15 +21,13 @@ function parseJSON(text) {
   throw new Error('No JSON found in AI response');
 }
 
-// ─── Public API ────────────────────────────────────────────────────────────
-
 export async function suggestWebsites(goal) {
   const system = `You are a helpful assistant for a productivity tool called Warden.
 Your job is to suggest a list of relevant websites for the user's declared goal.
 Provide a mix of general-purpose sites (like Wikipedia) and specific, niche sites if applicable.
 Only suggest websites that are likely to be useful for the user's goal.
 
-You MUST respond with ONLY valid JSON — no prose, no markdown fences:
+You MUST respond with ONLY valid JSON, no prose, no markdown fences:
 {"sites":["example.com","anotherexample.com"]}`;
 
   const msg = `DECLARED GOAL:\n${goal}`;
@@ -60,14 +36,12 @@ You MUST respond with ONLY valid JSON — no prose, no markdown fences:
     const text = await call(system, msg);
     const json = parseJSON(text);
     return json.sites || [];
-  } catch (e) {
-    if (e.message.includes('Ollama') || e.message.includes('Groq') || e.message.includes('key')) throw e;
+  } catch (_e) {
     return [];
   }
 }
 
 export async function judgeProofOfCompletion(goal, proof, pageActivity = []) {
-  // Build an evidence block from the captured page data
   let evidenceBlock;
   if (pageActivity.length > 0) {
     const pages = pageActivity.slice(0, 10).map((p) => {
@@ -84,18 +58,18 @@ export async function judgeProofOfCompletion(goal, proof, pageActivity = []) {
 Your job is to determine if the user genuinely completed their declared goal.
 
 You have TWO sources of evidence:
-1. Automatically captured browsing data — the actual pages the user visited (titles + content excerpts)
+1. Automatically captured browsing data, the actual pages the user visited (titles + content excerpts)
 2. The user's own written explanation of what they did
 
 Evaluation rules:
-- Weight the browsing evidence heavily — it is objective and cannot be faked
+- Weight the browsing evidence heavily, it is objective and cannot be faked
 - If browsing evidence strongly aligns with the goal, lean toward approving even with thin written proof
 - If browsing evidence does NOT match the goal (wrong sites, irrelevant content), reject even with a good written story
 - If there is no browsing evidence at all, require a more detailed written proof
 - Reject vague written answers ("done", "finished it") when unsupported by evidence
-- Be firm but fair — a plausible match is enough
+- Be firm but fair, a plausible match is enough
 
-You MUST respond with ONLY valid JSON — no prose, no markdown fences:
+You MUST respond with ONLY valid JSON, no prose, no markdown fences:
 {"approved":true,"confidence":85,"feedback":"short explanation referencing specific evidence","missing":"what's needed if rejected"}`;
 
   const msg = `DECLARED GOAL:\n${goal}\n\n${evidenceBlock}\n\nUSER'S WRITTEN EXPLANATION:\n${proof || '(none provided)'}`;
@@ -103,25 +77,29 @@ You MUST respond with ONLY valid JSON — no prose, no markdown fences:
   try {
     const text = await call(system, msg);
     return parseJSON(text);
-  } catch (e) {
-    if (e.message.includes('Ollama') || e.message.includes('Groq') || e.message.includes('key')) throw e;
-    return { approved: false, confidence: 0, feedback: 'Could not parse AI response. Please try again.', missing: '' };
+  } catch (_e) {
+    return {
+      approved: false,
+      confidence: 0,
+      feedback: 'Could not parse AI response. Please try again.',
+      missing: '',
+    };
   }
 }
 
 export async function judgeEmergencyRequest(reason, goal, requestedUrl) {
   const system = `You are a lenient judge for a productivity tool called Warden.
 A user locked in a work session needs temporary access to a blocked website.
-Be reasonable — approve genuine needs, deny obvious avoidance.
+Be reasonable, approve genuine needs, deny obvious avoidance.
 
-You MUST respond with ONLY valid JSON — no prose, no markdown fences:
+You MUST respond with ONLY valid JSON, no prose, no markdown fences:
 {"approved":true,"duration":10,"reasoning":"short explanation","warning":"optional note if approved"}
 
 duration must be 5, 10, 15, or 30 (minutes). Only include if approved.`;
 
   const msg = `Session goal:\n${goal}\n\nRequested URL: ${requestedUrl}\n\nUser's reason:\n${reason}`;
 
-  // Log the bypass attempt
+  
   await chrome.runtime.sendMessage({
     type: 'LOG_BYPASS_ATTEMPT',
     request: { url: requestedUrl, reason, time: Date.now() },
@@ -130,8 +108,10 @@ duration must be 5, 10, 15, or 30 (minutes). Only include if approved.`;
   try {
     const text = await call(system, msg);
     return parseJSON(text);
-  } catch (e) {
-    if (e.message.includes('Ollama') || e.message.includes('Groq') || e.message.includes('key')) throw e;
-    return { approved: false, reasoning: 'Could not parse AI response. Please try again.' };
+  } catch (_e) {
+    return {
+      approved: false,
+      reasoning: 'Could not parse AI response. Please try again.',
+    };
   }
 }
