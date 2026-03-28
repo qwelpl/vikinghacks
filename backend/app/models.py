@@ -35,3 +35,13 @@ class PermitExceptionRequest(BaseModel):
 class PermitExceptionResponse(BaseModel):
     decision: str
     explanation: str
+
+
+class EndSessionEarlyRequest(BaseModel):
+    goal: str = Field(min_length=1, max_length=500)
+    proof: str = Field(min_length=1, max_length=2000)
+
+
+class EndSessionEarlyResponse(BaseModel):
+    decision: str  # "ALLOW" or "DENY"
+    explanation: str
