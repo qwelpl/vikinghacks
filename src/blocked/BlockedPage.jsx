@@ -13,36 +13,6 @@ function getDomain(url) {
   catch { return url; }
 }
 
-
-function Particles() {
-  const particles = [
-    { size: 200, x: 10, y: 20, delay: 0 },
-    { size: 120, x: 80, y: 60, delay: 1.5 },
-    { size: 80,  x: 50, y: 80, delay: 0.7 },
-    { size: 160, x: 20, y: 70, delay: 2 },
-    { size: 100, x: 70, y: 10, delay: 1 },
-  ];
-  return (
-    <>
-      {particles.map((p, i) => (
-        <div
-          key={i}
-          className="particle"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            transform: 'translate(-50%,-50%)',
-            background: 'radial-gradient(circle, rgba(185, 28, 28, 0.4) 0%, transparent 70%)',
-            animationDelay: `${p.delay}s`,
-          }}
-        />
-      ))}
-    </>
-  );
-}
-
 export default function BlockedPage() {
   const { url, tabId } = getParams();
   const domain = getDomain(url);
@@ -74,6 +44,7 @@ export default function BlockedPage() {
           type: 'GRANT_EMERGENCY_ACCESS',
           url: requestUrl.trim(),
           duration: v.duration || 10,
+          tabId: tabId,
         });
         setView('approved');
       } else {
@@ -89,14 +60,9 @@ export default function BlockedPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden px-4">
-      <Particles />
-
-      
       <div className="relative z-10 w-full max-w-lg">
-        
         {view === 'blocked' && (
           <div className="text-center animate-fade-in">
-            
             <div className="flex justify-center mb-8">
               <div
                 className="w-24 h-24 rounded-3xl flex items-center justify-center animate-glow animate-float"
@@ -109,14 +75,12 @@ export default function BlockedPage() {
             <h1 className="text-5xl font-black text-white tracking-tight mb-3">Blocked.</h1>
             <p className="text-xl text-gray-400 mb-2">You're locked in right now.</p>
 
-            
             <div className="inline-flex items-center gap-2 bg-red-900/30 border border-red-800/40 rounded-full px-4 py-2 mb-8">
               <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px #ef4444' }} />
               <span className="text-red-400 font-mono text-sm">{domain}</span>
               <span className="text-red-600/60 text-xs">is blocked</span>
             </div>
 
-            
             {session && (
               <div className="bg-black/30 rounded-2xl border border-red-500/30 p-6 mb-6 text-left">
                 <div className="flex items-start justify-between mb-4">
@@ -139,7 +103,6 @@ export default function BlockedPage() {
               </div>
             )}
 
-            
             <div className="space-y-3">
               <button
                 onClick={() => setView('form')}
@@ -159,7 +122,6 @@ export default function BlockedPage() {
           </div>
         )}
 
-        
         {view === 'form' && (
           <div className="animate-fade-in">
             <button
@@ -221,7 +183,6 @@ export default function BlockedPage() {
           </div>
         )}
 
-        
         {view === 'judging' && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div className="w-20 h-20 rounded-full bg-amber-900/30 border-2 border-amber-700/50 flex items-center justify-center">
@@ -234,7 +195,6 @@ export default function BlockedPage() {
           </div>
         )}
 
-        
         {view === 'approved' && verdict && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div
@@ -257,7 +217,6 @@ export default function BlockedPage() {
           </div>
         )}
 
-        
         {view === 'denied' && verdict && (
           <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
             <div
@@ -290,7 +249,6 @@ export default function BlockedPage() {
         )}
       </div>
 
-      
       <div className="fixed bottom-6 flex items-center gap-1.5 text-gray-600 text-xs">
         <Lock size={12} />
         Warden — Stay focused. Stay honest.
