@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {getCurrentUser} from '../utils/storage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
