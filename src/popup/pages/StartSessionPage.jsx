@@ -59,9 +59,13 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
   function addSite(url, reason = 'AI Suggestion') {
     if (!url.trim()) return;
-    const hostname = new URL(url).hostname;
-    if (sites.find(s => s.url === hostname)) return;
-    setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
+    try {
+      const hostname = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+      if (sites.find(s => s.url === hostname)) return;
+      setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
+    } catch (e) {
+      // Invalid URL, do nothing
+    }
   }
 
   function handleAddSiteManual() {
