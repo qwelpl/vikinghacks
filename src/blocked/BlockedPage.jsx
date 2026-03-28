@@ -69,7 +69,7 @@ export default function BlockedPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden px-4">
-      <div className="relative z-10 w-full max-w-lg">
+      <div className="relative z-10 w-full" style={{ maxWidth: 480 }}>
         {view === 'blocked' && (
           <div className="text-center">
             <div className="flex justify-center mb-8">
@@ -91,39 +91,39 @@ export default function BlockedPage() {
             </div>
 
             {session && (
-              <div className="bg-black/30 rounded-2xl border border-red-500/30 p-6 mb-6 text-left">
-                <div className="flex items-start justify-between mb-4">
+              <div className="bg-black/30 rounded-2xl border border-red-500/30 p-4 mb-5 text-left">
+                <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Active Session</p>
-                    <p className="text-base font-semibold text-white">{session.goal || 'Focus Session'}</p>
+                    <p className="text-sm font-semibold text-white">{session.goal || 'Focus Session'}</p>
                   </div>
                   <div className="text-right shrink-0 ml-4">
                     <p className="text-xs text-gray-400 mb-0.5">Elapsed</p>
-                    <p className="text-lg font-bold text-red-400 tabular-nums">{formatTime(elapsed)}</p>
+                    <p className="text-base font-bold text-red-400 tabular-nums">{formatTime(elapsed)}</p>
                   </div>
                 </div>
 
                 {session.goal && (
                   <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Your Goal</p>
-                    <p className="text-sm text-red-300 leading-relaxed">{session.goal}</p>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Your Goal</p>
+                    <p className="text-xs text-red-300 leading-relaxed">{session.goal}</p>
                   </div>
                 )}
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <button
                 onClick={() => setView('form')}
-                className="w-full py-4 bg-amber-900/20 hover:bg-amber-800/20 border border-amber-700/40 text-amber-400 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2 text-base"
+                className="w-full py-3 bg-amber-900/20 hover:bg-amber-800/20 border border-amber-700/40 text-amber-400 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
               >
-                <AlertTriangle size={18} />
+                <AlertTriangle size={16} />
                 Request Emergency Access
               </button>
 
               <button
                 onClick={() => window.history.back()}
-                className="w-full py-3 text-gray-400 hover:text-white text-sm transition-colors"
+                className="w-full py-2.5 text-gray-400 hover:text-white text-sm transition-colors"
               >
                 ← Go Back
               </button>
