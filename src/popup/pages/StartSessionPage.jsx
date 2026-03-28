@@ -63,8 +63,8 @@ const STEPS = ['Your Goal', 'Allowed Sites', 'Settings', 'Review & Lock'];
 export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [step, setStep] = useStickyState(0, 'step');
   const [goal, setGoal] = useStickyState('', 'goal');
-  const [tasks, setTasks] = useStickyState([], 'tasks'); // Added tasks state
-  const [newTaskInput, setNewTaskInput] = useState(''); // New state for manual task input
+  const [tasks, setTasks] = useStickyState([], 'tasks'); 
+  const [newTaskInput, setNewTaskInput] = useState(''); 
   const [sites, setSites] = useStickyState([], 'sites');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteReason, setSiteReason] = useState('');
