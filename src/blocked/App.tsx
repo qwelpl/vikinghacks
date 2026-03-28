@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 const LockIcon = () => (
   <svg
@@ -32,6 +32,38 @@ export default function App() {
   const task = params.get("task");
 
   const [glitching, setGlitching] = useState(false);
+  const [siteTitle, setSiteTitle] = useState<string | null>(null);
+  const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
+  const [excuse, setExcuse] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch the blocked site to get its title and favicon
+  useEffect(() => {
+    if (!blockedUrl || blockedUrl === "this site") return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(blockedUrl, { signal: controller.signal });
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const title = doc.querySelector("title")?.textContent?.trim() || null;
+        setSiteTitle(title);
+        // Try to get favicon
+        const iconEl =
+          doc.querySelector<HTMLLinkElement>("link[rel~='icon']") ||
+          doc.querySelector<HTMLLinkElement>("link[rel~='shortcut icon']");
+        if (iconEl?.href) {
+          setSiteFavicon(iconEl.href);
+        } else {
+          const origin = new URL(blockedUrl).origin;
+          setSiteFavicon(`${origin}/favicon.ico`);
+        }
+      } catch {
+        // CORS or network failure — silent
+      }
+    })();
+    return () => controller.abort();
+  }, [blockedUrl]);
 
   useEffect(() => {
     // Initial glitch on load
@@ -121,8 +153,23 @@ export default function App() {
           )}
         </div>
 
-        {/* Blocked URL */}
-        <div className="anim-2 px-4 py-2 bg-red-950/40 border border-red-800/50 rounded-lg backdrop-blur-sm max-w-full">
+        {/* Blocked URL + site info */}
+        <div className="anim-2 flex flex-col items-center gap-1.5 px-4 py-2.5 bg-red-950/40 border border-red-800/50 rounded-lg backdrop-blur-sm max-w-full w-full">
+          {(siteFavicon || siteTitle) && (
+            <div className="flex items-center gap-2">
+              {siteFavicon && (
+                <img
+                  src={siteFavicon}
+                  alt=""
+                  className="w-4 h-4 rounded-sm opacity-80"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+              {siteTitle && (
+                <span className="text-gray-300 text-xs truncate max-w-[220px]">{siteTitle}</span>
+              )}
+            </div>
+          )}
           <span className="text-red-400 text-sm font-mono break-all">{blockedUrl}</span>
         </div>
 
@@ -145,6 +192,27 @@ export default function App() {
             <p className="text-white text-sm leading-relaxed">{task}</p>
           </div>
         )}
+
+        {/* Exception request */}
+        <div className="anim-4 w-full flex flex-col gap-2">
+          <p className="text-xs text-gray-500 uppercase tracking-widest">
+            Request an exception
+          </p>
+          <textarea
+            ref={textareaRef}
+            value={excuse}
+            onChange={(e) => setExcuse(e.target.value)}
+            placeholder="Explain why you need access to this site..."
+            rows={3}
+            className="w-full px-3 py-2.5 bg-gray-950/90 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-700 resize-none focus:outline-none focus:border-red-700 transition-colors"
+          />
+          <button
+            type="button"
+            className="w-full py-2 bg-transparent border border-red-800/60 hover:border-red-600 text-red-500 hover:text-red-400 text-xs font-semibold tracking-widest uppercase rounded-xl transition-colors"
+          >
+            Submit Request
+          </button>
+        </div>
 
         {/* Footer */}
         <p className="anim-4 text-gray-700 text-xs tracking-[0.3em] uppercase">

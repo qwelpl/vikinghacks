@@ -14,8 +14,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (url.protocol === "chrome-extension:") return;
 
     if (!allowed.includes(url.hostname)) {
+      const blockedPage = chrome.runtime.getURL("blocked/index.html");
       chrome.tabs.update(tabId, {
-        url: chrome.runtime.getURL("blocked/index.html"),
+        url: `${blockedPage}?url=${encodeURIComponent(tab.url)}`,
       });
     }
   });
