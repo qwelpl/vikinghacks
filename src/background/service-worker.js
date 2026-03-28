@@ -33,9 +33,19 @@ function matchUrl(url, pattern) {
   if (!url || !pattern) return false;
   try {
     const u = new URL(url);
-    const p = pattern.replace(/https?:\/\//, '').replace(/\/$/, '').toLowerCase();
+    // Normalize pattern: strip protocol, www, trailing slash, and path
+    const p = pattern.toLowerCase()
+      .replace(/https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '')
+      .split('/')[0];
+
     const h = u.hostname.replace(/^www\./, '').toLowerCase();
-    return h === p || h.endsWith('.' + p) || u.href.toLowerCase().includes(p);
+
+    // Exact match, or the URL is a subdomain OF the pattern
+    // e.g. pattern "docs.google.com" matches "www.docs.google.com"
+    // but pattern "google.com" does NOT match "docs.google.com"
+    return h === p || h.endsWith('.' + p);
   } catch {
     return url.toLowerCase().includes(pattern.toLowerCase());
   }
