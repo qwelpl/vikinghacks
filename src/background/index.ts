@@ -13,7 +13,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     const allowed: string[] = data.session.allowedHosts ?? [];
     const url = new URL(tabUrl);
 
-    if (url.protocol === "chrome-extension:") return;
+    if (url.protocol === "chrome-extension:" || url.protocol === "chrome:") return;
 
     if (!allowed.includes(url.hostname)) {
       const blockedPage = chrome.runtime.getURL("blocked/index.html");
