@@ -35,9 +35,29 @@ export default function App() {
       return;
     }
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsLoading(false);
-    // TODO: wire up auth
+    try {
+      const res = await fetch(`http://localhost:8000/auth/${mode === "login" ? "login" : "signup"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail ?? "Something went wrong.");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        return;
+      }
+      chrome.storage.local.set({ accountToken: data.account_token }, () => {
+        window.close();
+      });
+    } catch {
+      setError("Could not reach the Warden server.");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const switchMode = (m: Mode) => {
