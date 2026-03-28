@@ -33,7 +33,7 @@ export default function App() {
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
       if (res?.session) {
         setSession(res.session);
-        if (page !== 'active') setPage('active');
+        if (page === 'home' || page === 'start') setPage('active');
       } else if (!res?.session && page === 'active') {
         // Session just ended, show report
         setLastSession(session);
