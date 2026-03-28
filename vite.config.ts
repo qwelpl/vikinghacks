@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         popup: path.resolve("src/popup/index.html"),
         blocked: path.resolve("src/blocked/index.html"),
+        login: path.resolve("src/login/index.html")
       },
     },
   },
