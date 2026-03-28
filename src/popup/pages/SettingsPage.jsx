@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { logout } from '../../utils/auth';
 import { ChevronLeft } from 'lucide-react';
 
-export default function SettingsPage({ user, onBack, onLogout }) {
+export default function SettingsPage({ user, onBack, onLogout, onSessionEnd }) {
   const [override, setOverride] = useState('');
   const [overrideMsg, setOverrideMsg] = useState('');
 
   async function handleOverride() {
     setOverrideMsg('');
     const res = await chrome.runtime.sendMessage({ type: 'ADMIN_OVERRIDE', password: override });
-    setOverrideMsg(res?.success ? 'Session ended.' : res?.error || 'Failed.');
+    if (res?.success) {
+      onSessionEnd(); // immediately navigate away — no need to wait for the poll
+    } else {
+      setOverrideMsg(res?.error || 'Failed.');
+    }
   }
 
   async function handleLogout() {
@@ -55,7 +59,7 @@ export default function SettingsPage({ user, onBack, onLogout }) {
             </button>
           </div>
           {overrideMsg && (
-            <p className={`text-xs mt-2 ${overrideMsg.includes('ended') ? 'text-red-400' : 'text-red-400'}`}>{overrideMsg}</p>
+            <p className="text-xs mt-2 text-red-400">{overrideMsg}</p>
           )}
         </div>
 

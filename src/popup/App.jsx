@@ -9,12 +9,8 @@ import SettingsPage from './pages/SettingsPage';
 export default function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('home');
-  const pageRef = React.useRef('home');
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Keep ref in sync so the polling interval always reads the latest page
-  const _setPage = (p) => { pageRef.current = p; setPage(p); };
 
   // Initial load
   useEffect(() => {
@@ -22,27 +18,26 @@ export default function App() {
       const u = await getCurrentUser();
       setUser(u || null);
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
-      if (res?.session) { setSession(res.session); _setPage('active'); }
+      if (res?.session) { setSession(res.session); setPage('active'); }
       setLoading(false);
     }
     init();
   }, []);
 
-  // Poll for session changes every 2 s — use pageRef to avoid stale closures
+  // Poll for session changes every 2 s
   useEffect(() => {
     const id = setInterval(async () => {
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
-      const currentPage = pageRef.current;
       if (res?.session) {
         setSession(res.session);
-        if (currentPage === 'home' || currentPage === 'start') _setPage('active');
-      } else if (!res?.session && currentPage === 'active') {
+        if (page === 'home' || page === 'start') setPage('active');
+      } else if (!res?.session && page === 'active') {
         setSession(null);
-        _setPage('home');
+        setPage('home');
       }
     }, 2000);
     return () => clearInterval(id);
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -63,8 +58,9 @@ export default function App() {
     return (
       <SettingsPage
         user={user}
-        onBack={() => _setPage(session ? 'active' : 'home')}
-        onLogout={() => { setUser(null); _setPage('home'); }}
+        onBack={() => setPage(session ? 'active' : 'home')}
+        onLogout={() => { setUser(null); setPage('home'); }}
+        onSessionEnd={() => { setSession(null); setPage('home'); }}
       />
     );
   }
@@ -75,8 +71,8 @@ export default function App() {
         session={session}
         user={user}
         onSessionUpdate={setSession}
-        onSessionEnd={() => { setSession(null); _setPage('home'); }}
-        onSettings={() => _setPage('settings')}
+        onSessionEnd={() => { setSession(null); setPage('home'); }}
+        onSettings={() => setPage('settings')}
       />
     );
   }
@@ -85,8 +81,8 @@ export default function App() {
     return (
       <StartSessionPage
         user={user}
-        onBack={() => _setPage('home')}
-        onSessionStart={(s) => { setSession(s); _setPage('active'); }}
+        onBack={() => setPage('home')}
+        onSessionStart={(s) => { setSession(s); setPage('active'); }}
       />
     );
   }
@@ -94,8 +90,8 @@ export default function App() {
   return (
     <HomePage
       user={user}
-      onStart={() => _setPage('start')}
-      onSettings={() => _setPage('settings')}
+      onStart={() => setPage('start')}
+      onSettings={() => setPage('settings')}
     />
   );
 }
