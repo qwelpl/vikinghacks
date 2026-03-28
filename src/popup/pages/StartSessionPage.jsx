@@ -4,6 +4,35 @@ import { hashPassword } from '../../utils/helpers';
 import { suggestWebsites } from '../../utils/aiApi';
 import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
 
+const DRAFT_KEY = 'warden_session_draft';
+
+// A custom hook to keep state in chrome.storage.local
+function useStickyState(defaultValue, key) {
+  const [value, setValue] = useState(defaultValue);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    chrome.storage.local.get(DRAFT_KEY, (result) => {
+      const draft = result[DRAFT_KEY] || {};
+      if (draft[key] !== undefined) {
+        setValue(draft[key]);
+      }
+      setHydrated(true);
+    });
+  }, [key]);
+
+  useEffect(() => {
+    if (hydrated) {
+      chrome.storage.local.get(DRAFT_KEY, (result) => {
+        const draft = result[DRAFT_KEY] || {};
+        chrome.storage.local.set({ [DRAFT_KEY]: { ...draft, [key]: value } });
+      });
+    }
+  }, [value, key, hydrated]);
+
+  return [value, setValue];
+}
+
 function Steps({ current, total }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -32,15 +61,15 @@ function Toggle({ value, onChange }) {
 const STEPS = ['Your Goal', 'Allowed Sites', 'Settings', 'Review & Lock'];
 
 export default function StartSessionPage({ user, onBack, onSessionStart }) {
-  const [step, setStep] = useState(0);
-  const [goal, setGoal] = useState('');
-  const [sites, setSites] = useState([]);
+  const [step, setStep] = useStickyState(0, 'step');
+  const [goal, setGoal] = useStickyState('', 'goal');
+  const [sites, setSites] = useStickyState([], 'sites');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteReason, setSiteReason] = useState('');
-  const [breaksEnabled, setBreaksEnabled] = useState(true);
-  const [breakInterval, setBreakInterval] = useState(60);
-  const [breakDuration, setBreakDuration] = useState(5);
-  const [adminPwd, setAdminPwd] = useState('');
+  const [breaksEnabled, setBreaksEnabled] = useStickyState(true, 'breaksEnabled');
+  const [breakInterval, setBreakInterval] = useStickyState(60, 'breakInterval');
+  const [breakDuration, setBreakDuration] = useStickyState(5, 'breakDuration');
+  const [adminPwd, setAdminPwd] = useStickyState('', 'adminPwd');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -122,6 +151,10 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
       const res = await chrome.runtime.sendMessage({ type: 'START_SESSION', session });
       if (res?.error) throw new Error(res.error);
+      
+      // Clear the draft after starting the session
+      await chrome.storage.local.remove(DRAFT_KEY);
+
       onSessionStart(session);
     } catch (e) {
       setError(e.message);
