@@ -6,8 +6,7 @@ import {
   AlertTriangle,
   Check,
   X,
-  ChevronLeft,
-  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 
 function getParams() {
@@ -187,7 +186,6 @@ export default function BlockedPage() {
                 style={{ background: 'linear-gradient(135deg,#d97706,#92400e)', boxShadow: '0 4px 20px rgba(217,119,6,0.3)' }}
               >
                 Submit to AI Judge
-                <ChevronRight size={16} />
               </button>
             </div>
           </div>
