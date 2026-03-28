@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type View = "home" | "session";
 
@@ -6,42 +6,18 @@ type SessionData = {
   active: boolean;
   task: string;
   allowedHosts: string[];
+  duration?: number;
+  startTime?: number;
 };
 
 export default function App() {
   const [view, setView] = useState<View>("home");
   const [task, setTask] = useState("");
+  const [duration, setDuration] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [remainingTime, setRemainingTime] = useState("");
 
-  useEffect(() => {
-    chrome.storage.local.get("session", (data) => {
-      const session: SessionData | undefined = data.session;
-
-      if (session?.active) {
-        setTask(session.task ?? "");
-        setView("session");
-      }
-
-      setLoading(false);
-    });
-  }, []);
-
-  const startSession = () => {
-    const trimmedTask = task.trim();
-    if (!trimmedTask) return;
-
-    const session: SessionData = {
-      active: true,
-      task: trimmedTask,
-      allowedHosts: [],
-    };
-
-    chrome.storage.local.set({ session }, () => {
-      setView("session");
-    });
-  };
-
-  const endSession = () => {
+  const endSession = useCallback(() => {
     chrome.storage.local.get("session", (data) => {
       const current: SessionData | undefined = data.session;
 
@@ -51,12 +27,80 @@ export default function App() {
             ...(current ?? {}),
             active: false,
             allowedHosts: [],
+            duration: undefined,
+            startTime: undefined,
           },
         },
         () => {
           setView("home");
         }
       );
+    });
+  }, []);
+
+  useEffect(() => {
+    const updateRemainingTime = (session: SessionData) => {
+      if (session.active && session.startTime && session.duration) {
+        const elapsedSeconds = (Date.now() - session.startTime) / 1000;
+        const totalSessionSeconds = session.duration * 60;
+        const remainingSeconds = Math.max(
+          0,
+          totalSessionSeconds - elapsedSeconds
+        );
+
+        if (remainingSeconds <= 0) {
+          endSession();
+        }
+
+        const hours = Math.floor(remainingSeconds / 3600);
+        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+        const seconds = Math.floor(remainingSeconds % 60);
+
+        setRemainingTime(
+          `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+        );
+      }
+    };
+
+    chrome.storage.local.get("session", (data) => {
+      const session: SessionData | undefined = data.session;
+
+      if (session?.active) {
+        setTask(session.task ?? "");
+        setView("session");
+        updateRemainingTime(session);
+      }
+
+      setLoading(false);
+    });
+
+    const interval = setInterval(() => {
+      chrome.storage.local.get("session", (data) => {
+        if (data.session?.active) {
+          updateRemainingTime(data.session);
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [endSession]);
+
+  const startSession = () => {
+    const trimmedTask = task.trim();
+    if (!trimmedTask) return;
+
+    const session: SessionData = {
+      active: true,
+      task: trimmedTask,
+      allowedHosts: [],
+      duration: duration,
+      startTime: Date.now(),
+    };
+
+    chrome.storage.local.set({ session }, () => {
+      setView("session");
     });
   };
 
@@ -73,7 +117,7 @@ export default function App() {
       <div className="w-80 min-h-48 bg-gray-950 text-white p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-red-400">Warden - Active</h1>
-          <span className="text-xs text-gray-500">locked</span>
+          <span className="text-xs text-gray-500">{remainingTime}</span>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-3 text-sm text-gray-300">
@@ -116,6 +160,18 @@ export default function App() {
           placeholder="e.g. Finish chapter 5 problem set"
           value={task}
           onChange={(e) => setTask(e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="text-xs text-gray-500 uppercase tracking-wide">
+          Session duration (minutes)
+        </label>
+        <input
+          type="number"
+          className="bg-gray-800 rounded-lg p-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600"
+          value={duration}
+          onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
         />
       </div>
 
