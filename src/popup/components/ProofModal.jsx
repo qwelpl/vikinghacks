@@ -78,7 +78,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-600">
-                  📊 Browsing Evidence
+                  Browsing Evidence
                 </p>
                 <span className="text-[11px] text-[#6b6a7b]">
                   {hasEvidence ? `${pageActivity.length} page(s) captured` : 'None captured'}

@@ -259,19 +259,18 @@ async function handle(msg) {
     case 'GRANT_EMERGENCY_ACCESS': {
       const s = await getActiveSession();
       if (!s) return { error: 'No active session' };
-
       const { url, duration } = msg;
       if (!s.emergencyAccess) s.emergencyAccess = [];
-
-      
-      s.emergencyAccess = s.emergencyAccess.filter((a) => !matchUrl(url, a.url));
+      const siteUrl = new URL(url).origin;
+      s.emergencyAccess = s.emergencyAccess.filter(
+        (a) => a.url !== siteUrl
+      );
       s.emergencyAccess.push({
-        url,
+        url: siteUrl,
         grantedAt: Date.now(),
         grantedUntil: Date.now() + duration * 60 * 1000,
         duration,
       });
-
       await setActiveSession(s);
       return { success: true };
     }

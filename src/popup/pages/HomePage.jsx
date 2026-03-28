@@ -69,12 +69,11 @@ export default function HomePage({ user, onStart, onSettings }) {
           <div className="px-4 pb-3">
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Sessions', value: stats.total, emoji: '📋' },
-                { label: 'Completed', value: stats.completed, emoji: '✅' },
-                { label: 'Focus Time', value: formatDuration(stats.totalTime), emoji: '⏱' },
+                { label: 'Sessions', value: stats.total},
+                { label: 'Completed', value: stats.completed},
+                { label: 'Focus Time', value: formatDuration(stats.totalTime)},
               ].map((s) => (
                 <div key={s.label} className="bg-black/30 rounded-xl p-3 border border-red-500/30">
-                  <div className="text-base mb-1">{s.emoji}</div>
                   <div className="text-sm font-bold text-white">{s.value}</div>
                   <div className="text-[11px] text-gray-400 mt-0.5">{s.label}</div>
                 </div>
