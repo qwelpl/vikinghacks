@@ -5,57 +5,51 @@ import HomePage from './pages/HomePage';
 import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
-import SessionReportPage from './pages/SessionReportPage';
-import { Lock } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('home');
+  const pageRef = React.useRef('home');
   const [session, setSession] = useState(null);
-  const [lastSession, setLastSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  
+  // Keep ref in sync so the polling interval always reads the latest page
+  const _setPage = (p) => { pageRef.current = p; setPage(p); };
+
+  // Initial load
   useEffect(() => {
     async function init() {
       const u = await getCurrentUser();
       setUser(u || null);
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
-      if (res?.session) { setSession(res.session); setPage('active'); }
+      if (res?.session) { setSession(res.session); _setPage('active'); }
       setLoading(false);
     }
     init();
   }, []);
 
-  
+  // Poll for session changes every 2 s — use pageRef to avoid stale closures
   useEffect(() => {
     const id = setInterval(async () => {
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
+      const currentPage = pageRef.current;
       if (res?.session) {
         setSession(res.session);
-        if (page === 'home' || page === 'start') setPage('active');
-      } else if (!res?.session && page === 'active') {
-        
-        setLastSession(session);
+        if (currentPage === 'home' || currentPage === 'start') _setPage('active');
+      } else if (!res?.session && currentPage === 'active') {
         setSession(null);
-        setPage('report');
+        _setPage('home');
       }
     }, 2000);
     return () => clearInterval(id);
-  }, [page, session]);
-
-  function handleSessionEnd() {
-    setLastSession(session);
-    setSession(null);
-    setPage('report');
-  }
+  }, []);
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
+      <div className="flex-1 flex items-center justify-center bg-[#0a0a0f]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
-            <Lock size={20} />
+          <div className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
+            <LockSVG size={20} />
           </div>
           <div className="spinner w-5 h-5" />
         </div>
@@ -65,21 +59,12 @@ export default function App() {
 
   if (!user) return <AuthPage onAuth={setUser} />;
 
-  if (page === 'report' && lastSession) {
-    return (
-      <SessionReportPage
-        session={lastSession}
-        onDone={() => { setLastSession(null); setPage('home'); }}
-      />
-    );
-  }
-
   if (page === 'settings') {
     return (
       <SettingsPage
         user={user}
-        onBack={() => setPage(session ? 'active' : 'home')}
-        onLogout={() => { setUser(null); setPage('home'); }}
+        onBack={() => _setPage(session ? 'active' : 'home')}
+        onLogout={() => { setUser(null); _setPage('home'); }}
       />
     );
   }
@@ -90,8 +75,8 @@ export default function App() {
         session={session}
         user={user}
         onSessionUpdate={setSession}
-        onSessionEnd={handleSessionEnd}
-        onSettings={() => setPage('settings')}
+        onSessionEnd={() => { setSession(null); _setPage('home'); }}
+        onSettings={() => _setPage('settings')}
       />
     );
   }
@@ -100,8 +85,8 @@ export default function App() {
     return (
       <StartSessionPage
         user={user}
-        onBack={() => setPage('home')}
-        onSessionStart={(s) => { setSession(s); setPage('active'); }}
+        onBack={() => _setPage('home')}
+        onSessionStart={(s) => { setSession(s); _setPage('active'); }}
       />
     );
   }
@@ -109,8 +94,17 @@ export default function App() {
   return (
     <HomePage
       user={user}
-      onStart={() => setPage('start')}
-      onSettings={() => setPage('settings')}
+      onStart={() => _setPage('start')}
+      onSettings={() => _setPage('settings')}
     />
+  );
+}
+
+function LockSVG({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
   );
 }
