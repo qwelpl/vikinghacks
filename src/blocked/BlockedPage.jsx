@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { judgeEmergencyRequest } from '../utils/aiApi';
 import { formatTime } from '../utils/helpers';
-import { Lock, AlertTriangle, Check, X, ChevronLeft } from 'lucide-react';
+import {
+  Lock,
+  AlertTriangle,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 function getParams() {
   const p = new URLSearchParams(window.location.search);
@@ -9,8 +16,11 @@ function getParams() {
 }
 
 function getDomain(url) {
-  try { return new URL(url).hostname.replace(/^www\./, ''); }
-  catch { return url; }
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
 }
 
 export default function BlockedPage() {
@@ -18,7 +28,7 @@ export default function BlockedPage() {
   const domain = getDomain(url);
   const [session, setSession] = useState(null);
   const [now, setNow] = useState(Date.now());
-  const [view, setView] = useState('blocked'); 
+  const [view, setView] = useState('blocked');
   const [requestUrl, setRequestUrl] = useState(url);
   const [reason, setReason] = useState('');
   const [verdict, setVerdict] = useState(null);
@@ -51,7 +61,7 @@ export default function BlockedPage() {
         setView('denied');
       }
     } catch (e) {
-      setError(e.message);
+      setError(e.message || 'Something went wrong');
       setView('form');
     }
   }
@@ -62,7 +72,7 @@ export default function BlockedPage() {
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden px-4">
       <div className="relative z-10 w-full max-w-lg">
         {view === 'blocked' && (
-          <div className="text-center animate-fade-in">
+          <div className="text-center">
             <div className="flex justify-center mb-8">
               <div
                 className="w-24 h-24 rounded-3xl flex items-center justify-center animate-glow animate-float"
@@ -123,7 +133,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'form' && (
-          <div className="animate-fade-in">
+          <div>
             <button
               onClick={() => setView('blocked')}
               className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 text-sm transition-colors"
@@ -159,7 +169,7 @@ export default function BlockedPage() {
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Be specific — what do you need on this site, and how does it relate to your current task?"
+                  placeholder="Be specific - what do you need on this site, and how does it relate to your current task?"
                   className="w-full px-4 py-3.5 bg-black/30 border border-red-500/30 rounded-xl text-white text-sm placeholder-gray-500 resize-none h-32 transition-colors"
                 />
               </div>
@@ -184,19 +194,19 @@ export default function BlockedPage() {
         )}
 
         {view === 'judging' && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div className="w-20 h-20 rounded-full bg-amber-900/30 border-2 border-amber-700/50 flex items-center justify-center">
               <div className="spinner w-8 h-8" style={{ borderTopColor: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Consulting the Judge…</h2>
+              <h2 className="text-2xl font-bold text-white">Consulting the Judge...</h2>
               <p className="text-gray-400 mt-2">The AI is reviewing your request</p>
             </div>
           </div>
         )}
 
         {view === 'approved' && verdict && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(185, 28, 28, 0.15)', border: '2px solid rgba(185, 28, 28, 0.4)', boxShadow: '0 0 40px rgba(185, 28, 28, 0.2)' }}
@@ -218,7 +228,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'denied' && verdict && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(239,68,68,0.1)', border: '2px solid rgba(239,68,68,0.3)' }}
@@ -233,7 +243,10 @@ export default function BlockedPage() {
             </div>
             <div className="w-full max-w-sm space-y-3">
               <button
-                onClick={() => { setView('form'); setVerdict(null); }}
+                onClick={() => {
+                  setView('form');
+                  setVerdict(null);
+                }}
                 className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-medium transition-colors"
               >
                 Try Again
@@ -251,7 +264,7 @@ export default function BlockedPage() {
 
       <div className="fixed bottom-6 flex items-center gap-1.5 text-gray-600 text-xs">
         <Lock size={12} />
-        Warden — Stay focused. Stay honest.
+        Warden - Stay focused. Stay honest.
       </div>
     </div>
   );

@@ -14,11 +14,9 @@ export default function Modal({ title, onClose, children, wide = false }) {
         className={`w-full bg-[#13131a] rounded-t-2xl border border-[#1f1f2e] animate-slide-up overflow-hidden ${wide ? 'max-h-[520px]' : 'max-h-[480px]'}`}
         style={{ boxShadow: '0 -8px 40px rgba(0,0,0,0.5)' }}
       >
-        
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-8 h-1 rounded-full bg-[#2d2d3e]" />
         </div>
-
         
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f2e]">
           <h2 className="text-sm font-semibold text-white">{title}</h2>
