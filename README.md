@@ -1,8 +1,10 @@
-# VikingHacks 2026 Source Code
-## The story
-Me, my friend, my other friend, my other friend, and my other friend once came together.
-We had an idea. A dream.
+# VikingHacks 2026
+*The beginning of an epic saga*
+## Part 1. The Story
+One day, I had a dream.
 The dream was to get a j*b.
-To find someone who believed in that dream with us.
-We chose to do this the only way we knew how.
+To find someone who believed in that dream with me was a real challenge.
+I chose to do this the only way I knew how.
 With the power of **friendship**.
+I recruited four of my friends.
+And, together we decided to ***build something amazing.***
