@@ -19,7 +19,7 @@ export default function HomePage({ user, onStart, onSettings }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
-      {/* Header */}
+      
       <div className="flex items-center justify-between px-5 py-4 border-b border-red-500/30 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-900/50">
@@ -39,9 +39,9 @@ export default function HomePage({ user, onStart, onSettings }) {
         </div>
       </div>
 
-      {/* Scrollable body */}
+      
       <div className="flex-1 overflow-y-auto">
-        {/* CTA */}
+        
         <div className="px-4 pt-4 pb-3">
           <button
             onClick={onStart}
@@ -64,7 +64,7 @@ export default function HomePage({ user, onStart, onSettings }) {
           </button>
         </div>
 
-        {/* Stats */}
+        
         {stats.total > 0 && (
           <div className="px-4 pb-3">
             <div className="grid grid-cols-3 gap-2">
@@ -83,7 +83,7 @@ export default function HomePage({ user, onStart, onSettings }) {
           </div>
         )}
 
-        {/* Recent sessions */}
+        
         {history.length > 0 && (
           <div className="px-4 pb-4">
             <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Recent</p>

@@ -166,7 +166,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
-      {/* Header */}
+      
       <div className="flex items-center gap-3 px-4 py-4 border-b border-red-500/30 shrink-0">
         <button
           onClick={step === 0 ? onBack : () => setStep(step - 1)}
@@ -183,10 +183,10 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         </div>
       </div>
 
-      {/* Content */}
+      
       <div className="flex-1 overflow-y-auto px-4 py-4">
 
-        {/* ── Step 0: Goal ── */}
+        
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div>
@@ -207,7 +207,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        {/* ── Step 1: Allowed Sites ── */}
+        
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -305,7 +305,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        {/* ── Step 2: Settings ── */}
+        
         {step === 2 && (
           <div className="space-y-4 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -356,7 +356,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        {/* ── Step 3: Review ── */}
+        
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -396,7 +396,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         )}
       </div>
 
-      {/* Footer */}
+      
       <div className="px-4 py-4 border-t border-red-500/30 shrink-0">
         {step < STEPS.length - 1 ? (
           <button
