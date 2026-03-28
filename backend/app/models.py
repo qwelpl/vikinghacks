@@ -25,3 +25,15 @@ class MessageResponse(BaseModel):
 class LoginResponse(BaseModel):
     message: str
     user: UserResponse
+    account_token: str
+
+
+class PermitExceptionRequest(BaseModel):
+    goal: str = Field(min_length=1, max_length=500)
+    website: str = Field(min_length=1, max_length=500)
+    reason: str = Field(min_length=1, max_length=1000)
+
+
+class PermitExceptionResponse(BaseModel):
+    decision: str
+    explanation: str

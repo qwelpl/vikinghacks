@@ -7,7 +7,7 @@ from models import LoginRequest, LoginResponse, MessageResponse, SignupRequest, 
 router = APIRouter()
 
 
-@router.post("/signup", response_model=UserResponse)
+@router.post("/signup")
 def signup(data: SignupRequest):
     existing_email = get_user_by_email(data.email)
     if existing_email:
@@ -18,13 +18,17 @@ def signup(data: SignupRequest):
         raise HTTPException(status_code=400, detail="Username already in use")
 
     hashed_password = generate_password_hash(data.password)
-    user_id = create_user(data.username, data.email, hashed_password)
+    user_id, account_token = create_user(data.username, data.email, hashed_password)
 
-    return UserResponse(
-        id=user_id,
-        username=data.username,
-        email=data.email,
-    )
+    return {
+        "message": "Signup successful",
+        "user": UserResponse(
+            id=user_id,
+            username=data.username,
+            email=data.email,
+        ),
+        "account_token": account_token,
+    }
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -43,6 +47,7 @@ def login(data: LoginRequest):
             username=user["username"],
             email=user["email"],
         ),
+        account_token=user["account_token"],
     )
 
 
