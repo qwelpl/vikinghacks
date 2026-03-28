@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { logout } from '../../utils/auth';
-import { ChevronLeft } from 'lucide-react';
+import React, {useState} from 'react';
+import {logout} from '../../utils/auth';
+import {ChevronLeft} from 'lucide-react';
 
 export default function SettingsPage({ user, onBack, onLogout }) {
   const [override, setOverride] = useState('');

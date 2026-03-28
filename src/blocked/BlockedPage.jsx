@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { judgeEmergencyRequest } from '../utils/aiApi';
-import { formatTime } from '../utils/helpers';
-import {
-  Lock,
-  AlertTriangle,
-  Check,
-  X,
-  ChevronLeft
-} from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {judgeEmergencyRequest} from '../utils/aiApi';
+import {formatTime} from '../utils/helpers';
+import {AlertTriangle, Check, ChevronLeft, Lock, X} from 'lucide-react';
 
 function getParams() {
   const p = new URLSearchParams(window.location.search);

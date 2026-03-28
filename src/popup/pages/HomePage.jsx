@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { getSessionHistory } from '../../utils/storage';
-import { formatDuration, timeAgo } from '../../utils/helpers';
-import { Lock, Settings, Plus } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {getSessionHistory} from '../../utils/storage';
+import {formatDuration, timeAgo} from '../../utils/helpers';
+import {Lock, Plus, Settings} from 'lucide-react';
 
 function computeStreak(sessions) {
   const MS_PER_DAY = 86400000;
