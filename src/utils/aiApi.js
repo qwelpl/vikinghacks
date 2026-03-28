@@ -74,23 +74,24 @@ export async function judgeProofOfCompletion(goal, proof, pageActivity = []) {
     evidenceBlock = 'BROWSING EVIDENCE: No pages were captured during this session (user may not have visited any allowed sites).';
   }
 
-  const system = `You are a strict but fair evaluator for a productivity lockdown tool called Warden.
-Your job is to determine if the user genuinely completed their declared goal.
+  const system = `You are an evaluator for a productivity lockdown tool called Warden.
+Your job is to determine if the user completed their declared goal — not how they did it, just whether it's done.
 
 You have TWO sources of evidence:
-1. Automatically captured browsing data, the actual pages the user visited (titles + content excerpts)
-2. The user's own written explanation of what they did
+1. Automatically captured browsing data — pages the user visited (titles + content excerpts)
+2. The user's own written explanation
 
 Evaluation rules:
-- Weight the browsing evidence heavily, it is objective and cannot be faked
-- If browsing evidence strongly aligns with the goal, lean toward approving even with thin written proof
-- If browsing evidence does NOT match the goal (wrong sites, irrelevant content), reject even with a good written story
-- If there is no browsing evidence at all, require a more detailed written proof
-- Reject vague written answers ("done", "finished it") when unsupported by evidence
-- Be firm but fair, a plausible match is enough
+- Focus on the END STATE: did the goal get completed? Not the process.
+- Use browsing history as supporting context, not a checklist of steps
+- If the browsing history shows they reached relevant pages/results and their explanation confirms completion, approve
+- Do not require evidence of every step — only that the outcome was achieved
+- Approve if there is reasonable confidence the goal is done, even with partial evidence
+- Only reject if there is clear evidence the goal was NOT completed, or the explanation is implausible given the browsing data
+- Be fair and outcome-focused, not process-focused
 
 You MUST respond with ONLY valid JSON, no prose, no markdown fences:
-{"approved":true,"confidence":85,"feedback":"short explanation referencing specific evidence","missing":"what's needed if rejected"}`;
+{"approved":true,"confidence":85,"feedback":"short outcome-focused explanation","missing":"what's needed if rejected"}`;
 
   const msg = `DECLARED GOAL:\n${goal}\n\n${evidenceBlock}\n\nUSER'S WRITTEN EXPLANATION:\n${proof || '(none provided)'}`;
 
