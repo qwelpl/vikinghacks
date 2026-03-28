@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
 import { suggestWebsites, suggestTasks } from '../../utils/aiApi';
-import { ChevronLeft, ChevronRight, Lock, X, Sparkles, Plus } from 'lucide-react';
+import { ChevronLeft, Lock, X, Sparkles, Plus } from 'lucide-react';
 
 const DRAFT_KEY = 'warden_session_draft';
 
@@ -486,7 +486,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
             className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
           >
             Continue
-            <ChevronRight size={14} />
           </button>
         ) : (
           <button
