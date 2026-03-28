@@ -136,7 +136,7 @@ export default function ActiveSessionPage({ session, onSessionEnd, onSettings })
           style={{ background: 'linear-gradient(135deg,#991b1b,#7f1d1d)', boxShadow: '0 4px 16px rgba(185, 28, 28, 0.3)' }}
         >
           <Check size={15} />
-          I'm Done — Verify My Work
+          I'm Done
         </button>
 
         <button

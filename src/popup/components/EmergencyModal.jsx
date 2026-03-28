@@ -39,7 +39,6 @@ export default function EmergencyModal({ session, onClose, onGranted }) {
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-[#8b8a9b] leading-relaxed">
               Explain what you need and why. An AI judge will decide if your reason is legitimate.
-              Be honest — vague excuses will be denied.
             </p>
             <div>
               <label className="block text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-1.5">
@@ -111,7 +110,7 @@ export default function EmergencyModal({ session, onClose, onGranted }) {
                     <p className="text-xs text-[#6b6a7b] mt-2 leading-relaxed">{result.reasoning}</p>
                   )}
                   {result.warning && (
-                    <p className="text-xs text-amber-500/80 mt-2 leading-relaxed">⚠ {result.warning}</p>
+                    <p className="text-xs text-amber-500/80 mt-2 leading-relaxed">{result.warning}</p>
                   )}
                 </div>
                 <button
