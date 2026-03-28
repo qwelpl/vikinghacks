@@ -204,62 +204,25 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   return true; // keep channel open for async response
 });
 
-// ─── AI fetch helpers (run in SW to bypass CORS) ────────────────────────────
-
-async function swFetchOllama(baseUrl, model, system, userMsg) {
-  let res;
-  try {
-    res = await fetch(`${baseUrl}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        stream: false,
-        messages: [
-          { role: 'system', content: system  },
-          { role: 'user',   content: userMsg },
-        ],
-      }),
-    });
-  } catch (e) {
-    throw new Error(
-      `Cannot reach Ollama at ${baseUrl}. ` +
-      `Make sure it is running (ollama serve) and the model is pulled (ollama pull ${model}).`
-    );
-  }
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    if (res.status === 404)
-      throw new Error(`Model "${model}" not found. Run: ollama pull ${model}`);
-    throw new Error(`Ollama error ${res.status}: ${body.slice(0, 120)}`);
-  }
-  const data = await res.json();
-  return data.message?.content || '';
-}
-
-async function swFetchGroq(apiKey, model, system, userMsg) {
-  if (!apiKey) throw new Error('Groq API key not set. Add your free key in Settings (console.groq.com).');
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
+async function swFetchOpenAI(system, userMsg) {
+  const res = await fetch("http://localhost:3000/chat", {
+    method: "POST",
     headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
-      max_tokens: 600,
-      messages: [
-        { role: 'system', content: system  },
-        { role: 'user',   content: userMsg },
-      ],
+      system,
+      userMsg,
     }),
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Groq error ${res.status}`);
+    throw new Error(err.error || `Server error ${res.status}`);
   }
+
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
+  return data.text;
 }
 
 async function handle(msg) {
@@ -339,14 +302,8 @@ async function handle(msg) {
     }
 
     case 'CALL_AI': {
-      // Runs in the service worker so host_permissions bypasses Ollama's CORS restriction
-      const { provider, ollamaUrl, ollamaModel, groqApiKey, groqModel, system, userMsg } = msg;
-      let text;
-      if (provider === 'groq') {
-        text = await swFetchGroq(groqApiKey, groqModel, system, userMsg);
-      } else {
-        text = await swFetchOllama(ollamaUrl || 'http://localhost:11434', ollamaModel || 'llama3.2', system, userMsg);
-      }
+      const { system, userMsg } = msg;
+      const text = await swFetchOpenAI(system, userMsg);
       return { text };
     }
 
