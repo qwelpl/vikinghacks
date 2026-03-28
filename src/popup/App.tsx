@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 
 type View = "home" | "session";
+type SessionMode = "timer" | "completion";
 
 type SessionData = {
   active: boolean;
   task: string;
   allowedHosts: string[];
+  mode: SessionMode;
   duration?: number;
   startTime?: number;
 };
@@ -14,8 +16,10 @@ export default function App() {
   const [view, setView] = useState<View>("home");
   const [task, setTask] = useState("");
   const [duration, setDuration] = useState(25);
+  const [mode, setMode] = useState<SessionMode>("timer");
   const [loading, setLoading] = useState(true);
   const [remainingTime, setRemainingTime] = useState("");
+  const [session, setSession] = useState<SessionData | null>(null);
 
   const endSession = useCallback(() => {
     chrome.storage.local.get("session", (data) => {
@@ -24,25 +28,35 @@ export default function App() {
       chrome.storage.local.set(
         {
           session: {
-            ...(current ?? {}),
+            ...(current ?? {
+              active: false,
+              task: "",
+              allowedHosts: [],
+              mode: "timer",
+            }),
             active: false,
-            allowedHosts: [],
             duration: undefined,
             startTime: undefined,
           },
         },
         () => {
           setView("home");
+          setSession(null);
         }
       );
     });
   }, []);
 
   useEffect(() => {
-    const updateRemainingTime = (session: SessionData) => {
-      if (session.active && session.startTime && session.duration) {
-        const elapsedSeconds = (Date.now() - session.startTime) / 1000;
-        const totalSessionSeconds = session.duration * 60;
+    const updateRemainingTime = (sessionData: SessionData) => {
+      if (
+        sessionData.active &&
+        sessionData.mode === "timer" &&
+        sessionData.startTime &&
+        sessionData.duration
+      ) {
+        const elapsedSeconds = (Date.now() - sessionData.startTime) / 1000;
+        const totalSessionSeconds = sessionData.duration * 60;
         const remainingSeconds = Math.max(
           0,
           totalSessionSeconds - elapsedSeconds
@@ -50,6 +64,7 @@ export default function App() {
 
         if (remainingSeconds <= 0) {
           endSession();
+          return;
         }
 
         const hours = Math.floor(remainingSeconds / 3600);
@@ -65,12 +80,13 @@ export default function App() {
     };
 
     chrome.storage.local.get("session", (data) => {
-      const session: SessionData | undefined = data.session;
+      const sessionData: SessionData | undefined = data.session;
 
-      if (session?.active) {
-        setTask(session.task ?? "");
+      if (sessionData?.active) {
+        setSession(sessionData);
+        setTask(sessionData.task ?? "");
         setView("session");
-        updateRemainingTime(session);
+        updateRemainingTime(sessionData);
       }
 
       setLoading(false);
@@ -91,15 +107,17 @@ export default function App() {
     const trimmedTask = task.trim();
     if (!trimmedTask) return;
 
-    const session: SessionData = {
+    const newSession: SessionData = {
       active: true,
       task: trimmedTask,
       allowedHosts: [],
-      duration: duration,
-      startTime: Date.now(),
+      mode: mode,
+      duration: mode === "timer" ? duration : undefined,
+      startTime: mode === "timer" ? Date.now() : undefined,
     };
 
-    chrome.storage.local.set({ session }, () => {
+    chrome.storage.local.set({ session: newSession }, () => {
+      setSession(newSession);
       setView("session");
     });
   };
@@ -112,12 +130,14 @@ export default function App() {
     );
   }
 
-  if (view === "session") {
+  if (view === "session" && session) {
     return (
       <div className="w-80 min-h-48 bg-gray-950 text-white p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-red-400">Warden - Active</h1>
-          <span className="text-xs text-gray-500">{remainingTime}</span>
+          <span className="text-xs text-gray-500">
+            {session.mode === "timer" ? remainingTime : "Locked In"}
+          </span>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-3 text-sm text-gray-300">
@@ -133,7 +153,7 @@ export default function App() {
           onClick={endSession}
           className="mt-auto text-xs text-gray-600 hover:text-gray-400 transition-colors"
         >
-          End session
+          Request to End
         </button>
       </div>
     );
@@ -165,15 +185,41 @@ export default function App() {
 
       <div className="flex flex-col gap-2">
         <label className="text-xs text-gray-500 uppercase tracking-wide">
-          Session duration (minutes)
+          Session Mode
         </label>
-        <input
-          type="number"
-          className="bg-gray-800 rounded-lg p-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600"
-          value={duration}
-          onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
-        />
+        <div className="flex bg-gray-800 rounded-lg p-1">
+          <button
+            onClick={() => setMode("timer")}
+            className={`flex-1 text-sm py-1 rounded-md ${
+              mode === "timer" ? "bg-red-600 text-white" : "text-gray-400"
+            }`}
+          >
+            Timer
+          </button>
+          <button
+            onClick={() => setMode("completion")}
+            className={`flex-1 text-sm py-1 rounded-md ${
+              mode === "completion" ? "bg-red-600 text-white" : "text-gray-400"
+            }`}
+          >
+            Completion
+          </button>
+        </div>
       </div>
+
+      {mode === "timer" && (
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-gray-500 uppercase tracking-wide">
+            Session duration (minutes)
+          </label>
+          <input
+            type="number"
+            className="bg-gray-800 rounded-lg p-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-600"
+            value={duration}
+            onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
+          />
+        </div>
+      )}
 
       <button
         onClick={startSession}
