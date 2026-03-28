@@ -70,11 +70,11 @@ export default function ProofModal({ session, onClose, onApproved }) {
     <Modal title="✅ Submit Proof of Completion" onClose={onClose} wide>
       <div className="px-5 py-4">
 
-        {/* ── Form ── */}
+        
         {step === 'form' && (
           <div className="space-y-4 animate-fade-in">
 
-            {/* Browsing evidence */}
+            
             <div>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-600">
@@ -99,7 +99,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
               )}
             </div>
 
-            {/* Task list */}
+            
             <div className="bg-[#0a0a0f] rounded-xl p-3 border border-[#1f1f2e]">
               <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">Your Tasks</p>
               <ul className="space-y-1.5">
@@ -116,7 +116,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
               </ul>
             </div>
 
-            {/* Written explanation */}
+            
             <div>
               <label className="block text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-1.5">
                 Your Explanation {hasEvidence ? '(optional but helps)' : '(required — be specific)'}
@@ -154,7 +154,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
           </div>
         )}
 
-        {/* ── Judging ── */}
+        
         {step === 'judging' && (
           <div className="flex flex-col items-center justify-center gap-4" style={{ minHeight: '320px' }}>
             <div className="w-14 h-14 rounded-full bg-violet-900/30 border border-violet-700/50 flex items-center justify-center">
@@ -169,7 +169,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
           </div>
         )}
 
-        {/* ── Approved ── */}
+        
         {step === 'approved' && verdict && (
           <div className="flex flex-col items-center py-8 text-center gap-5 animate-fade-in">
             <div
@@ -193,7 +193,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
           </div>
         )}
 
-        {/* ── Rejected ── */}
+        
         {step === 'rejected' && verdict && (
           <div className="flex flex-col items-center py-6 text-center gap-4 animate-fade-in">
             <div className="w-14 h-14 rounded-full bg-red-900/30 border border-red-700/50 flex items-center justify-center">

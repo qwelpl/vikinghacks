@@ -24,7 +24,7 @@ export default function AuthPage({ onAuth }) {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in">
-      {/* Brand */}
+      
       <div className="mb-8 flex flex-col items-center gap-3">
         <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-xl shadow-red-900/50">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -38,7 +38,7 @@ export default function AuthPage({ onAuth }) {
         </div>
       </div>
 
-      {/* Tab switcher */}
+      
       <div className="w-full bg-black/30 rounded-xl p-1 flex mb-5 border border-red-500/30">
         {[['login', 'Sign In'], ['signup', 'Create Account']].map(([t, label]) => (
           <button
@@ -53,7 +53,7 @@ export default function AuthPage({ onAuth }) {
         ))}
       </div>
 
-      {/* Form */}
+      
       <form onSubmit={handleSubmit} className="w-full space-y-3">
         <input
           type="text"
