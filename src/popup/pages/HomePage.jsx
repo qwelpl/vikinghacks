@@ -3,9 +3,25 @@ import { getSessionHistory } from '../../utils/storage';
 import { formatDuration, timeAgo } from '../../utils/helpers';
 import { Lock, Settings, Plus } from 'lucide-react';
 
+function computeStreak(sessions) {
+  const MS_PER_DAY = 86400000;
+  const completed = sessions.filter((s) => s.status === 'completed');
+  if (!completed.length) return 0;
+  const daySet = new Set(completed.map((s) => Math.floor((s.endTime || s.startTime) / MS_PER_DAY)));
+  const days = Array.from(daySet).sort((a, b) => b - a);
+  const todayDay = Math.floor(Date.now() / MS_PER_DAY);
+  if (days[0] < todayDay - 1) return 0;
+  let streak = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (days[i - 1] - days[i] === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
 export default function HomePage({ user, onStart, onSettings }) {
   const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState({ total: 0, completed: 0, totalTime: 0 });
+  const [stats, setStats] = useState({ total: 0, completed: 0, totalTime: 0, streak: 0 });
 
   useEffect(() => {
     getSessionHistory().then((h) => {
@@ -13,7 +29,8 @@ export default function HomePage({ user, onStart, onSettings }) {
       setHistory(all.slice(0, 5));
       const completed = all.filter((s) => s.status === 'completed').length;
       const totalTime = all.reduce((acc, s) => acc + ((s.endTime || s.startTime) - s.startTime), 0);
-      setStats({ total: all.length, completed, totalTime });
+      const streak = computeStreak(all);
+      setStats({ total: all.length, completed, totalTime, streak });
     });
   }, [user.id]);
 
@@ -64,7 +81,26 @@ export default function HomePage({ user, onStart, onSettings }) {
           </button>
         </div>
 
-        
+
+        {stats.streak > 0 && (
+          <div className="px-4 pb-3">
+            <div
+              className="rounded-xl px-4 py-3 flex items-center gap-3"
+              style={{ background: 'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(239,68,68,0.1))', border: '1px solid rgba(251,146,60,0.3)' }}
+            >
+              <span className="text-2xl">🔥</span>
+              <div>
+                <p className="text-sm font-bold text-white">
+                  {stats.streak} day{stats.streak !== 1 ? 's' : ''} in a row
+                </p>
+                <p className="text-[11px] text-orange-400/70">
+                  {stats.streak >= 7 ? 'Unstoppable!' : stats.streak >= 3 ? 'Keep it going!' : 'Streak started!'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {stats.total > 0 && (
           <div className="px-4 pb-3">
             <div className="grid grid-cols-3 gap-2">

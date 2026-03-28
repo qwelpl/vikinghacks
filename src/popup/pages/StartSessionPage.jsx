@@ -435,7 +435,14 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
               </p>
               {tasks.length === 0
                 ? <p className="text-sm text-gray-400">No specific tasks set.</p>
-                : <ul className="space-y-1">{tasks.map((t) => <li key={t.id} className="text-sm text-white truncate">{t.description}</li>)}</ul>
+                : <ul className="space-y-1">{tasks.map((t) => (
+                    <li key={t.id} className="flex items-center justify-between gap-2">
+                      <span className="text-sm text-white truncate flex-1">{t.description}</span>
+                      <button onClick={() => setTasks(tasks.filter(x => x.id !== t.id))} className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0">
+                        <X size={12} />
+                      </button>
+                    </li>
+                  ))}</ul>
               }
             </div>
 
