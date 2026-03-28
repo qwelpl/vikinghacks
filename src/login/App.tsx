@@ -28,11 +28,20 @@ export default function App() {
 
   const handleSubmit = async () => {
     setError("");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!email || !password) {
-      setError("All fields are required.");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
+    setError("All fields are required.");
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+    return;
+    }
+
+    if (!emailRegex.test(email)) {
+    setError("Please enter a valid email address.");
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+    return;
     }
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 1500));
