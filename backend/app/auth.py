@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import create_user, get_user_by_email, get_user_by_username
+from db import create_user, get_user_by_email
 from models import LoginRequest, LoginResponse, MessageResponse, SignupRequest, UserResponse
 
 router = APIRouter()
@@ -13,18 +13,13 @@ def signup(data: SignupRequest):
     if existing_email:
         raise HTTPException(status_code=400, detail="Email already in use")
 
-    existing_username = get_user_by_username(data.username)
-    if existing_username:
-        raise HTTPException(status_code=400, detail="Username already in use")
-
     hashed_password = generate_password_hash(data.password)
-    user_id, account_token = create_user(data.username, data.email, hashed_password)
+    user_id, account_token = create_user(data.email, hashed_password)
 
     return {
         "message": "Signup successful",
         "user": UserResponse(
             id=user_id,
-            username=data.username,
             email=data.email,
         ),
         "account_token": account_token,
@@ -44,7 +39,6 @@ def login(data: LoginRequest):
         message="Login successful",
         user=UserResponse(
             id=user["id"],
-            username=user["username"],
             email=user["email"],
         ),
         account_token=user["account_token"],

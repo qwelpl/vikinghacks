@@ -19,7 +19,6 @@ def init_db():
         """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             account_token TEXT NOT NULL UNIQUE
@@ -51,7 +50,7 @@ def generate_account_token() -> str:
     return secrets.token_urlsafe(32)
 
 
-def create_user(username: str, email: str, password: str):
+def create_user(email: str, password: str):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -59,10 +58,10 @@ def create_user(username: str, email: str, password: str):
 
     cursor.execute(
         """
-        INSERT INTO users (username, email, password, account_token)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO users (email, password, account_token)
+        VALUES (?, ?, ?)
         """,
-        (username, email, password, account_token),
+        (email, password, account_token),
     )
 
     conn.commit()
@@ -77,7 +76,7 @@ def get_user_by_email(email: str):
 
     cursor.execute(
         """
-        SELECT id, username, email, password, account_token
+        SELECT id, email, password, account_token
         FROM users
         WHERE email = ?
         """,
@@ -88,32 +87,13 @@ def get_user_by_email(email: str):
     conn.close()
     return dict(row) if row else None
 
-
-def get_user_by_username(username: str):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT id, username, email, password, account_token
-        FROM users
-        WHERE username = ?
-        """,
-        (username,),
-    )
-
-    row = cursor.fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
 def get_user_by_account_token(account_token: str):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        SELECT id, username, email, password, account_token
+        SELECT id, email, password, account_token
         FROM users
         WHERE account_token = ?
         """,
