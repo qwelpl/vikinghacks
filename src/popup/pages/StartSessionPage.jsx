@@ -97,7 +97,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       if (sites.find(s => s.url === hostname)) return;
       setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
     } catch (e) {
-      // Invalid URL, do nothing
     }
   }
 
@@ -154,7 +153,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         id: uuidv4(),
         userId: user.id,
         goal: goal.trim(),
-        tasks: tasks, // Include tasks in the session object
+        tasks: tasks,
         allowedSites: sites,
         whitelist: ['chrome://newtab', 'chrome://extensions', 'chrome://settings'],
         breaks: {

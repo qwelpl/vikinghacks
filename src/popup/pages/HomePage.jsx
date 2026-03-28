@@ -109,7 +109,7 @@ export default function HomePage({ user, onStart, onSettings }) {
                     <span>⏱ {formatDuration((s.endTime || Date.now()) - s.startTime)}</span>
                     <span>{timeAgo(s.startTime)}</span>
                     {(s.pageActivity?.length > 0) && (
-                      <span>📄 {s.pageActivity.length} pages scanned</span>
+                      <span>{s.pageActivity.length} pages scanned</span>
                     )}
                   </div>
                 </div>

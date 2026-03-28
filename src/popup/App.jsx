@@ -12,7 +12,6 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initial load
   useEffect(() => {
     async function init() {
       const u = await getCurrentUser();
@@ -24,7 +23,6 @@ export default function App() {
     init();
   }, []);
 
-  // Poll for session changes every 2 s
   useEffect(() => {
     const id = setInterval(async () => {
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
