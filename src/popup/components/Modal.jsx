@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function Modal({ title, onClose, children, wide = false }) {
   useEffect(() => {
@@ -7,7 +8,7 @@ export default function Modal({ title, onClose, children, wide = false }) {
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
       <div
         className={`w-full bg-[#13131a] rounded-t-2xl border border-[#1f1f2e] animate-slide-up overflow-hidden ${wide ? 'max-h-[520px]' : 'max-h-[480px]'}`}
@@ -32,10 +33,11 @@ export default function Modal({ title, onClose, children, wide = false }) {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto" style={{ maxHeight: wide ? '440px' : '390px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: wide ? '440px' : '390px', minHeight: '200px' }}>
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
