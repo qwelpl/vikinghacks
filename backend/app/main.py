@@ -1,14 +1,19 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from auth import router as auth_router
 from db import init_db
 
-app = FastAPI(title="Warden Backend")
 
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
 
+
+app = FastAPI(
+    title="Warden",
+    lifespan=lifespan
+)
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
