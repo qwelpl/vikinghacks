@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Warden",
+  "version": "1.0.0",
+  "description": "AI-powered lockdown browser — declare your work, get locked in, only escape when you prove it's done.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "webNavigation",
+    "alarms",
+    "notifications",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:11434/*",
+    "http://127.0.0.1:11434/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:11434 http://127.0.0.1:11434 https://api.groq.com;"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html", "blocked.js", "blocked.css", "icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
