@@ -97,9 +97,9 @@ export default function HomePage({ user, onStart, onSettings }) {
                     <span
                       className={`shrink-0 text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                         s.status === 'completed'
-                          ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800/50'
+                          ? 'bg-red-900/40 text-red-400 border border-red-800/50'
                           : s.status === 'overridden'
-                          ? 'bg-amber-900/30 text-amber-500 border border-amber-800/40'
+                          ? 'bg-red-900/30 text-red-500 border border-red-800/40'
                           : 'bg-gray-800 text-gray-400'
                       }`}
                     >

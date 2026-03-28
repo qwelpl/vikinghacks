@@ -137,12 +137,12 @@ export default function SettingsPage({ user, onBack, onLogout }) {
           {/* Ollama config */}
           {cfg.aiProvider === 'ollama' && (
             <div className="space-y-3">
-              <div className="px-3 py-2.5 bg-blue-900/20 border border-blue-800/30 rounded-xl text-xs text-blue-400 leading-relaxed">
+              <div className="px-3 py-2.5 bg-red-900/20 border border-red-800/30 rounded-xl text-xs text-red-400 leading-relaxed">
                 Requires <span className="font-semibold">Ollama</span> running locally.
                 Install at <span className="font-mono">ollama.com</span>, then run:{' '}
-                <code className="bg-blue-900/30 px-1.5 py-0.5 rounded font-mono">ollama pull {cfg.ollamaModel}</code>
+                <code className="bg-red-900/30 px-1.5 py-0.5 rounded font-mono">ollama pull {cfg.ollamaModel}</code>
                 <br />
-                <span className="text-blue-500/70 mt-1 block">
+                <span className="text-red-500/70 mt-1 block">
                   If requests fail: <code className="font-mono">OLLAMA_ORIGINS=* ollama serve</code>
                 </span>
               </div>
@@ -170,7 +170,7 @@ export default function SettingsPage({ user, onBack, onLogout }) {
           {/* Groq config */}
           {cfg.aiProvider === 'groq' && (
             <div className="space-y-3">
-              <div className="px-3 py-2.5 bg-emerald-900/20 border border-emerald-800/30 rounded-xl text-xs text-emerald-400 leading-relaxed">
+              <div className="px-3 py-2.5 bg-red-900/20 border border-red-800/30 rounded-xl text-xs text-red-400 leading-relaxed">
                 Free tier at <span className="font-semibold">console.groq.com</span> — no credit card required.
                 Get your API key from API Keys → Create API Key.
               </div>
@@ -202,7 +202,7 @@ export default function SettingsPage({ user, onBack, onLogout }) {
             <button onClick={save} disabled={saving}
               className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
                 saved
-                  ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800/50'
+                  ? 'bg-red-900/40 text-red-400 border border-red-800/50'
                   : 'bg-red-600/20 hover:bg-red-600/30 border border-red-700 text-red-400 disabled:opacity-40'
               }`}>
               {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save'}
@@ -214,7 +214,7 @@ export default function SettingsPage({ user, onBack, onLogout }) {
           </div>
 
           {testMsg && (
-            <p className={`text-xs mt-2 leading-relaxed ${testMsg.startsWith('✓') ? 'text-emerald-400' : testMsg.startsWith('⚠') ? 'text-amber-400' : 'text-red-400'}`}>
+            <p className={`text-xs mt-2 leading-relaxed ${testMsg.startsWith('✓') ? 'text-red-400' : testMsg.startsWith('⚠') ? 'text-red-400' : 'text-red-400'}`}>
               {testMsg}
             </p>
           )}
@@ -234,7 +234,7 @@ export default function SettingsPage({ user, onBack, onLogout }) {
             </button>
           </div>
           {overrideMsg && (
-            <p className={`text-xs mt-2 ${overrideMsg.includes('ended') ? 'text-emerald-400' : 'text-red-400'}`}>{overrideMsg}</p>
+            <p className={`text-xs mt-2 ${overrideMsg.includes('ended') ? 'text-red-400' : 'text-red-400'}`}>{overrideMsg}</p>
           )}
         </div>
 

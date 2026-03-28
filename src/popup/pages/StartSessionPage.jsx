@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
 import { suggestWebsites } from '../../utils/aiApi';
@@ -45,18 +45,28 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [tabs, setTabs] = useState([]);
+
+  useEffect(() => {
+    async function fetchTabs() {
+      const allTabs = await chrome.tabs.query({});
+      setTabs(allTabs.filter(t => t.url && !t.url.startsWith('chrome://')));
+    }
+    if (step === 1) fetchTabs();
+  }, [step]);
 
   const canNext = step === 0 ? goal.trim().length > 0 : true;
 
-  function addSite(url) {
+  function addSite(url, reason = 'AI Suggestion') {
     if (!url.trim()) return;
-    if (sites.find(s => s.url === url.trim())) return;
-    setSites([...sites, { id: uuidv4(), url: url.trim(), reason: 'AI Suggestion' }]);
+    const hostname = new URL(url).hostname;
+    if (sites.find(s => s.url === hostname)) return;
+    setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
   }
 
   function handleAddSiteManual() {
     if (!siteUrl.trim()) return;
-    setSites([...sites, { id: uuidv4(), url: siteUrl.trim(), reason: siteReason.trim() }]);
+    addSite(siteUrl, siteReason);
     setSiteUrl('');
     setSiteReason('');
   }
@@ -166,6 +176,30 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
             </p>
 
             <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Open Tabs</p>
+              <div className="max-h-32 overflow-y-auto space-y-1 pr-1">
+                {tabs.map(t => (
+                  <div key={t.id} className="flex items-center gap-2">
+                    <input type="checkbox" id={`tab-${t.id}`}
+                      checked={sites.some(s => s.url === new URL(t.url).hostname)}
+                      onChange={(e) => {
+                        const hostname = new URL(t.url).hostname;
+                        if (e.target.checked) {
+                          addSite(t.url, 'From open tabs');
+                        } else {
+                          setSites(sites.filter(s => s.url !== hostname));
+                        }
+                      }}
+                      className="form-checkbox bg-black/50 border-red-500/30 text-red-600 focus:ring-red-500"
+                    />
+                    <label htmlFor={`tab-${t.id}`} className="text-sm text-white truncate flex-1">{t.title}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Manual Entry</p>
               <input
                 type="text"
                 value={siteUrl}
