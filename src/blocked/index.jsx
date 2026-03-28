@@ -3,4 +3,6 @@ import { createRoot } from 'react-dom/client';
 import BlockedPage from './BlockedPage';
 import './styles/blocked.css';
 
-createRoot(document.getElementById('root')).render(<BlockedPage />);
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<BlockedPage />);
