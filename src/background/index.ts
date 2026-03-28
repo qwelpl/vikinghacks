@@ -7,13 +7,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   const tabUrl = tab.url;
 
-  chrome.storage.local.get("session", (data) => {
+  chrome.storage.local.get(["session", "settings"], (data) => {
     if (!data.session?.active) return;
 
-    const allowed: string[] = data.session.allowedHosts ?? [];
+    const allowed = data.session.allowedHosts ?? [];
+    const whitelist = data.settings?.whitelist ?? [];
     const url = new URL(tabUrl);
 
-    if (url.protocol === "chrome-extension:" || url.protocol === "chrome:") return;
+    if (
+      url.protocol === "chrome-extension:" ||
+      url.protocol === "chrome:" ||
+      whitelist.includes(url.hostname)
+    ) {
+      return;
+    }
 
     if (!allowed.includes(url.hostname)) {
       const blockedPage = chrome.runtime.getURL("blocked/index.html");
