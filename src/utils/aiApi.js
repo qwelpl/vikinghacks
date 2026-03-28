@@ -45,6 +45,27 @@ function parseJSON(text) {
 
 // ─── Public API ────────────────────────────────────────────────────────────
 
+export async function suggestWebsites(goal) {
+  const system = `You are a helpful assistant for a productivity tool called Warden.
+Your job is to suggest a list of relevant websites for the user's declared goal.
+Provide a mix of general-purpose sites (like Wikipedia) and specific, niche sites if applicable.
+Only suggest websites that are likely to be useful for the user's goal.
+
+You MUST respond with ONLY valid JSON — no prose, no markdown fences:
+{"sites":["example.com","anotherexample.com"]}`;
+
+  const msg = `DECLARED GOAL:\n${goal}`;
+
+  try {
+    const text = await call(system, msg);
+    const json = parseJSON(text);
+    return json.sites || [];
+  } catch (e) {
+    if (e.message.includes('Ollama') || e.message.includes('Groq') || e.message.includes('key')) throw e;
+    return [];
+  }
+}
+
 export async function judgeProofOfCompletion(goal, proof, pageActivity = []) {
   // Build an evidence block from the captured page data
   let evidenceBlock;

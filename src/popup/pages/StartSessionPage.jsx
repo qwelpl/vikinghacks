@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
-import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react';
+import { suggestWebsites } from '../../utils/aiApi';
+import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
 
 function Steps({ current, total }) {
   return (
@@ -42,14 +43,35 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [adminPwd, setAdminPwd] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const canNext = step === 0 ? goal.trim().length > 0 : true;
 
-  function addSite() {
+  function addSite(url) {
+    if (!url.trim()) return;
+    if (sites.find(s => s.url === url.trim())) return;
+    setSites([...sites, { id: uuidv4(), url: url.trim(), reason: 'AI Suggestion' }]);
+  }
+
+  function handleAddSiteManual() {
     if (!siteUrl.trim()) return;
     setSites([...sites, { id: uuidv4(), url: siteUrl.trim(), reason: siteReason.trim() }]);
     setSiteUrl('');
     setSiteReason('');
+  }
+
+  async function generateSuggestions() {
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const suggested = await suggestWebsites(goal);
+      setSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSuggestions(false);
+    }
   }
 
   async function startSession() {
@@ -150,7 +172,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 onChange={(e) => setSiteUrl(e.target.value)}
                 placeholder="Website (e.g. docs.google.com)"
                 className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
-                onKeyDown={(e) => e.key === 'Enter' && addSite()}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddSiteManual()}
               />
               <input
                 type="text"
@@ -158,14 +180,33 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 onChange={(e) => setSiteReason(e.target.value)}
                 placeholder="Why do you need this? (optional)"
                 className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
-                onKeyDown={(e) => e.key === 'Enter' && addSite()}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddSiteManual()}
               />
               <button
-                onClick={addSite}
+                onClick={handleAddSiteManual}
                 className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors"
               >
                 + Add Site
               </button>
+            </div>
+
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <button
+                onClick={generateSuggestions}
+                disabled={loadingSuggestions}
+                className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {loadingSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Suggestions</>}
+              </button>
+              {suggestions.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {suggestions.map(s => (
+                    <button key={s} onClick={() => addSite(s)} className="px-2 py-1 bg-red-900/40 text-red-300 text-xs rounded-md hover:bg-red-800/40">
+                      + {s}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {sites.length === 0 ? (
