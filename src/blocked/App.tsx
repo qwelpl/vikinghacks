@@ -1,4 +1,6 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+
+const BACKEND = "http://localhost:8000";
 
 const LockIcon = () => (
   <svg
@@ -35,7 +37,61 @@ export default function App() {
   const [siteTitle, setSiteTitle] = useState<string | null>(null);
   const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
   const [excuse, setExcuse] = useState("");
+  const [submitState, setSubmitState] = useState<"idle" | "loading" | "allowed" | "denied">("idle");
+  const [aiExplanation, setAiExplanation] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const submitRequest = useCallback(async () => {
+    if (!excuse.trim() || submitState === "loading") return;
+    setSubmitState("loading");
+    try {
+      const storage = await new Promise<Record<string, unknown>>((r) =>
+        chrome.storage.local.get(["accountToken", "session"], r)
+      );
+      const token = storage.accountToken as string | undefined;
+      if (!token) {
+        setAiExplanation("You need to log in first. Open the login page from the extension.");
+        setSubmitState("denied");
+        return;
+      }
+      const session = storage.session as { task?: string } | undefined;
+      const goal = session?.task || task || "Stay focused";
+
+      const res = await fetch(`${BACKEND}/ai/permit-exception`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ goal, website: blockedUrl, reason: excuse.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAiExplanation(data.detail ?? "Request failed.");
+        setSubmitState("denied");
+        return;
+      }
+
+      setAiExplanation(data.explanation ?? "");
+
+      if (data.decision === "ALLOW") {
+        setSubmitState("allowed");
+        const hostname = (() => { try { return new URL(blockedUrl).hostname; } catch { return null; } })();
+        if (hostname) {
+          await new Promise<void>((r) =>
+            chrome.storage.local.get("session", (d) => {
+              const cur = d.session ?? {};
+              const hosts = Array.from(new Set([...(cur.allowedHosts ?? []), hostname]));
+              chrome.storage.local.set({ session: { ...cur, allowedHosts: hosts } }, () => r());
+            })
+          );
+        }
+        setTimeout(() => { window.location.href = blockedUrl; }, 1500);
+      } else {
+        setSubmitState("denied");
+      }
+    } catch {
+      setAiExplanation("Could not reach the Warden server. Is it running?");
+      setSubmitState("denied");
+    }
+  }, [excuse, blockedUrl, task, submitState]);
 
   // Fetch the blocked site to get its title and favicon
   useEffect(() => {
@@ -198,20 +254,42 @@ export default function App() {
           <p className="text-xs text-gray-500 uppercase tracking-widest">
             Request an exception
           </p>
-          <textarea
-            ref={textareaRef}
-            value={excuse}
-            onChange={(e) => setExcuse(e.target.value)}
-            placeholder="Explain why you need access to this site..."
-            rows={3}
-            className="w-full px-3 py-2.5 bg-gray-950/90 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-700 resize-none focus:outline-none focus:border-red-700 transition-colors"
-          />
-          <button
-            type="button"
-            className="w-full py-2 bg-transparent border border-red-800/60 hover:border-red-600 text-red-500 hover:text-red-400 text-xs font-semibold tracking-widest uppercase rounded-xl transition-colors"
-          >
-            Submit Request
-          </button>
+
+          {submitState === "allowed" && (
+            <div className="px-4 py-3 bg-green-950/60 border border-green-700/60 rounded-xl text-xs text-green-300 leading-relaxed">
+              <p className="font-semibold uppercase tracking-widest text-green-400 mb-1">Access granted</p>
+              <p>{aiExplanation}</p>
+              <p className="mt-1 text-green-600">Redirecting…</p>
+            </div>
+          )}
+
+          {submitState === "denied" && (
+            <div className="px-4 py-3 bg-red-950/60 border border-red-800/60 rounded-xl text-xs text-red-300 leading-relaxed">
+              <p className="font-semibold uppercase tracking-widest text-red-400 mb-1">Denied</p>
+              <p>{aiExplanation}</p>
+            </div>
+          )}
+
+          {submitState !== "allowed" && (
+            <>
+              <textarea
+                ref={textareaRef}
+                value={excuse}
+                onChange={(e) => setExcuse(e.target.value)}
+                placeholder="Explain why you need access to this site..."
+                rows={3}
+                className="w-full px-3 py-2.5 bg-gray-950/90 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-700 resize-none focus:outline-none focus:border-red-700 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={submitRequest}
+                disabled={!excuse.trim() || submitState === "loading"}
+                className="w-full py-2 bg-transparent border border-red-800/60 hover:border-red-600 disabled:border-gray-800 disabled:text-gray-600 text-red-500 hover:text-red-400 text-xs font-semibold tracking-widest uppercase rounded-xl transition-colors"
+              >
+                {submitState === "loading" ? "Asking Warden…" : "Submit Request"}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Footer */}

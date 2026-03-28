@@ -3,8 +3,20 @@
   "name": "Warden",
   "description": "AI-powered lockdown browser extension — stay focused and honest.",
   "version": "1.0.0",
+  "icons": {
+    "16": "icons/icon.png",
+    "32": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
   "action": {
-    "default_popup": "popup/index.html"
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "icons/icon.png",
+      "32": "icons/icon.png",
+      "48": "icons/icon.png",
+      "128": "icons/icon.png"
+    }
   },
   "background": {
     "service_worker": "background/index.ts",
@@ -12,6 +24,7 @@
   },
   "permissions": [
     "tabs",
+    "tabGroups",
     "storage",
     "webNavigation",
     "declarativeNetRequest"

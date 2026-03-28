@@ -21,6 +21,12 @@ export default function App() {
   const [remainingTime, setRemainingTime] = useState("");
   const [session, setSession] = useState<SessionData | null>(null);
 
+  const redirectToLogin = useCallback(() => {
+  const loginUrl = chrome.runtime.getURL("login/index.html");
+    chrome.tabs.create({ url: loginUrl });
+    window.close();
+  }, []);
+
   const endSession = useCallback(() => {
     chrome.storage.local.get("session", (data) => {
       const current: SessionData | undefined = data.session;
@@ -79,12 +85,19 @@ export default function App() {
       }
     };
 
-    chrome.storage.local.get("session", (data) => {
+    chrome.storage.local.get(["jwt", "session"], (data) => {
+      const jwt = data.jwt;
       const sessionData: SessionData | undefined = data.session;
+
+      if (!jwt) {
+        redirectToLogin();
+        return;
+      }
 
       if (sessionData?.active) {
         setSession(sessionData);
         setTask(sessionData.task ?? "");
+        setMode(sessionData.mode ?? "timer");
         setView("session");
         updateRemainingTime(sessionData);
       }
@@ -93,7 +106,15 @@ export default function App() {
     });
 
     const interval = setInterval(() => {
-      chrome.storage.local.get("session", (data) => {
+      chrome.storage.local.get(["jwt", "session"], (data) => {
+        const jwt = data.jwt;
+
+        if (!jwt) {
+          clearInterval(interval);
+          redirectToLogin();
+          return;
+        }
+
         if (data.session?.active) {
           updateRemainingTime(data.session);
         }
@@ -101,7 +122,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [endSession]);
+  }, [endSession, redirectToLogin]);
 
   const startSession = () => {
     const trimmedTask = task.trim();
