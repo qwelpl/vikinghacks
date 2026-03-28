@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { crx } from "@crxjs/vite-plugin";
 import manifest from "./src/manifest.json";
-import { fileURLToPath, URL } from "node:url";
+import path from "path";
 
 export default defineConfig({
   root: "src",
@@ -12,8 +12,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        popup: fileURLToPath(new URL("./src/popup/index.html", import.meta.url)),
-        blocked: fileURLToPath(new URL("./src/blocked/index.html", import.meta.url)),
+        popup: path.resolve("src/popup/index.html"),
+        blocked: path.resolve("src/blocked/index.html"),
       },
     },
   },

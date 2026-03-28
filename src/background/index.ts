@@ -9,10 +9,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (!data.session?.active) return;
 
     const allowed: string[] = data.session.allowedHosts ?? [];
-    const url = new URL(tab.url!);
+    const url = new URL(tab.url);
+
+    if (url.protocol === "chrome-extension:") return;
 
     if (!allowed.includes(url.hostname)) {
-      chrome.tabs.update(tabId, { url: chrome.runtime.getURL("blocked.html") });
+      chrome.tabs.update(tabId, {
+        url: chrome.runtime.getURL("blocked/index.html"),
+      });
     }
   });
 });
