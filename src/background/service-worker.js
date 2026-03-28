@@ -82,6 +82,10 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   const url = details.url;
   if (isAllowed(url, session)) return;
 
+  if (!session.distractionAttempts) session.distractionAttempts = [];
+  session.distractionAttempts.push({ url, time: Date.now(), type: 'block' });
+  await setActiveSession(session);
+
   const blockedUrl =
     chrome.runtime.getURL('blocked.html') +
     '?url=' + encodeURIComponent(url) +
@@ -232,6 +236,7 @@ async function handle(msg) {
 
     case 'START_SESSION': {
       const s = msg.session;
+      s.distractionAttempts = [];
       await setActiveSession(s);
       if (s.breaks?.enabled) {
         chrome.alarms.create('warden-break-start', { delayInMinutes: s.breaks.interval });
@@ -267,6 +272,15 @@ async function handle(msg) {
         duration,
       });
 
+      await setActiveSession(s);
+      return { success: true };
+    }
+
+    case 'LOG_BYPASS_ATTEMPT': {
+      const s = await getActiveSession();
+      if (!s) return { error: 'No active session' };
+      if (!s.distractionAttempts) s.distractionAttempts = [];
+      s.distractionAttempts.push({ ...msg.request, type: 'bypass' });
       await setActiveSession(s);
       return { success: true };
     }
