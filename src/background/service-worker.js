@@ -1,6 +1,6 @@
+// Warden Service Worker — handles tab blocking, break alarms, and message routing
 
-
-
+// ─── Storage helpers (inline to avoid import issues in SW) ─────────────────
 
 const getActiveSession = () =>
   new Promise((resolve) =>
@@ -27,27 +27,51 @@ const addToHistory = async (session) => {
   return new Promise((r) => chrome.storage.local.set({ [key]: data }, r));
 };
 
+const getSessionHistory = () =>
+  new Promise((resolve) =>
+    chrome.storage.local.get('warden_session_history', (r) =>
+      resolve(r['warden_session_history'] || [])
+    )
+  );
 
+// ─── URL matching ───────────────────────────────────────────────────────────
 
 function matchUrl(url, pattern) {
   if (!url || !pattern) return false;
+
   try {
-    const u = new URL(url);
-    // Normalize pattern: strip protocol, www, trailing slash, and path
-    const p = pattern.toLowerCase()
-      .replace(/https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/$/, '')
-      .split('/')[0];
+    const urlObj = new URL(url);
+    // Prepend https:// if missing to allow URL constructor to parse hostnames like "google.com"
+    const patternToParse = pattern.startsWith('http://') || pattern.startsWith('https://') ? pattern : `https://${pattern}`;
+    const patternObj = new URL(patternToParse);
 
-    const h = u.hostname.replace(/^www\./, '').toLowerCase();
+    const urlHostname = urlObj.hostname.replace(/^www\./, '').toLowerCase();
+    const patternHostname = patternObj.hostname.replace(/^www\./, '').toLowerCase();
 
-    // Exact match, or the URL is a subdomain OF the pattern
-    // e.g. pattern "docs.google.com" matches "www.docs.google.com"
-    // but pattern "google.com" does NOT match "docs.google.com"
-    return h === p || h.endsWith('.' + p);
-  } catch {
-    return url.toLowerCase().includes(pattern.toLowerCase());
+    // Check hostname match: exact or subdomain
+    // e.g., pattern "google.com" should match "google.com", "www.google.com", "docs.google.com"
+    const hostnameMatches = (urlHostname === patternHostname || urlHostname.endsWith('.' + patternHostname));
+
+    if (!hostnameMatches) {
+      return false;
+    }
+
+    // If hostname matches, now check path
+    const urlPath = urlObj.pathname.toLowerCase();
+    const patternPath = patternObj.pathname.toLowerCase();
+
+    // If the pattern has no specific path (or just '/'), any path on this domain is allowed
+    if (patternPath === '/' || patternPath === '') {
+      return true;
+    }
+
+    // If the pattern has a specific path, the URL's path must start with it
+    return urlPath.startsWith(patternPath);
+
+  } catch (e) {
+    // Fallback for invalid URLs or patterns that cannot be parsed by URL constructor
+    console.warn("Warden: Error parsing URL or pattern in matchUrl:", e);
+    return false;
   }
 }
 
@@ -78,13 +102,15 @@ function isAllowed(url, session) {
   return false;
 }
 
+// ─── Tab blocking ───────────────────────────────────────────────────────────
+
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   if (details.frameId !== 0) return;
 
   const session = await getActiveSession();
   if (!session) return;
 
-  
+  // Allow navigation during breaks
   if (session.breaks?.onBreak) return;
 
   const url = details.url;
@@ -94,15 +120,31 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   session.distractionAttempts.push({ url, time: Date.now(), type: 'block' });
   await setActiveSession(session);
 
+  let screenshot = '';
+  try {
+    // Attempt to capture screenshot, but don't let it block the redirect
+    screenshot = await chrome.tabs.captureVisibleTab();
+  } catch (e) {
+    console.error("Warden: Failed to capture visible tab for blocking:", e);
+    // Continue without screenshot if capture fails
+  }
+
   const blockedUrl =
     chrome.runtime.getURL('blocked.html') +
     '?url=' + encodeURIComponent(url) +
-    '&tabId=' + details.tabId;
+    '&tabId=' + details.tabId +
+    (screenshot ? '&screenshot=' + encodeURIComponent(screenshot) : ''); // Only add screenshot if available
 
-  chrome.tabs.update(details.tabId, { url: blockedUrl });
+  try {
+    // Attempt to redirect the tab
+    await chrome.tabs.update(details.tabId, { url: blockedUrl });
+  } catch (e) {
+    console.error("Warden: Failed to redirect tab to blocked page:", e);
+    // If update fails, consider alternative blocking methods or user notification
+  }
 });
 
-
+// ─── Break alarms ───────────────────────────────────────────────────────────
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'warden-break-start') {
@@ -146,8 +188,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-
-
+// ─── Page activity tracker ──────────────────────────────────────────────────
+// Runs in the page context via chrome.scripting — must be a standalone function
 function extractPageContent() {
   const candidates = [
     'article', 'main', '[role="main"]', '.content', '#content',
@@ -174,9 +216,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   const session = await getActiveSession();
   if (!session) return;
-  if (!isAllowed(url, session)) return; 
+  if (!isAllowed(url, session)) return; // only track pages the user is allowed on
 
-  
+  // Capture page content via scripting API
   let title = tab.title || url;
   let content = '';
   try {
@@ -189,12 +231,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       content = result.result.content || '';
     }
   } catch {
-    
+    // Page may have blocked scripting (PDFs, some SPAs) — continue without content
   }
 
   if (!session.pageActivity) session.pageActivity = [];
 
-  
+  // Merge with existing entry for this URL (dedup + accumulate visits)
   const existing = session.pageActivity.find((p) => p.url === url);
   if (existing) {
     existing.visits = (existing.visits || 1) + 1;
@@ -202,18 +244,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (content.length > existing.content.length) existing.content = content;
     if (title) existing.title = title;
   } else {
-    if (session.pageActivity.length >= 30) session.pageActivity.shift(); 
+    if (session.pageActivity.length >= 30) session.pageActivity.shift(); // cap at 30 pages
     session.pageActivity.push({ url, title, content, firstVisit: Date.now(), lastVisit: Date.now(), visits: 1 });
   }
 
   await setActiveSession(session);
 });
 
-
+// ─── Message handler ────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   handle(msg).then(sendResponse).catch((e) => sendResponse({ error: e.message }));
-  return true; 
+  return true; // keep channel open for async response
 });
 
 async function swFetchOpenAI(system, userMsg) {
@@ -242,6 +284,11 @@ async function handle(msg) {
     case 'GET_SESSION':
       return { session: await getActiveSession() };
 
+    case 'GET_LAST_SESSION': {
+      const history = await getSessionHistory();
+      return { lastSession: history[0] || null };
+    }
+
     case 'START_SESSION': {
       const s = msg.session;
       s.distractionAttempts = [];
@@ -254,32 +301,37 @@ async function handle(msg) {
 
     case 'END_SESSION': {
       const s = await getActiveSession();
+      let endedSession = null;
       if (s) {
         s.status = msg.status || 'completed';
         s.endTime = Date.now();
         await addToHistory(s);
+        endedSession = s;
         await clearActiveSession();
       }
       chrome.alarms.clearAll();
-      return { success: true };
+      return { success: true, endedSession };
     }
 
     case 'GRANT_EMERGENCY_ACCESS': {
       const s = await getActiveSession();
       if (!s) return { error: 'No active session' };
-      const { url, duration } = msg;
+
+      const { url, duration, tabId } = msg;
       if (!s.emergencyAccess) s.emergencyAccess = [];
-      const siteUrl = new URL(url).origin;
-      s.emergencyAccess = s.emergencyAccess.filter(
-        (a) => a.url !== siteUrl
-      );
+
+      // Remove any existing access for same domain using the robust matchUrl
+      s.emergencyAccess = s.emergencyAccess.filter((a) => !matchUrl(url, a.url));
       s.emergencyAccess.push({
-        url: siteUrl,
+        url,
         grantedAt: Date.now(),
         grantedUntil: Date.now() + duration * 60 * 1000,
         duration,
       });
+
       await setActiveSession(s);
+      // Update the tab to the requested URL
+      chrome.tabs.update(tabId, { url: url });
       return { success: true };
     }
 
@@ -301,10 +353,11 @@ async function handle(msg) {
 
     case 'ADMIN_OVERRIDE': {
       const s = await getActiveSession();
+      let endedSession = null;
       if (!s) return { error: 'No active session' };
       if (!s.adminPasswordHash) return { error: 'No admin password set for this session' };
 
-      
+      // Hash the provided password and compare
       const enc = new TextEncoder();
       const data = enc.encode(msg.password + 'warden_admin');
       const hashBuf = await crypto.subtle.digest('SHA-256', data);
@@ -317,9 +370,10 @@ async function handle(msg) {
       s.status = 'overridden';
       s.endTime = Date.now();
       await addToHistory(s);
+      endedSession = s;
       await clearActiveSession();
       chrome.alarms.clearAll();
-      return { success: true };
+      return { success: true, endedSession };
     }
 
     case 'CALL_AI': {

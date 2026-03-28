@@ -5,11 +5,14 @@ import HomePage from './pages/HomePage';
 import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
+import SessionReportPage from './pages/SessionReportPage'; // Import SessionReportPage
+import { Lock } from 'lucide-react'; // Import Lock icon
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('home');
   const [session, setSession] = useState(null);
+  const [lastSession, setLastSession] = useState(null); // State to hold last session for report
   const [loading, setLoading] = useState(true);
 
   // Initial load
@@ -28,23 +31,43 @@ export default function App() {
   useEffect(() => {
     const id = setInterval(async () => {
       const res = await chrome.runtime.sendMessage({ type: 'GET_SESSION' });
-      if (res?.session) {
+      
+      // If background reports no session, but our state still has one, it means it ended externally
+      if (!res?.session && session) {
+        const lastSessionRes = await chrome.runtime.sendMessage({ type: 'GET_LAST_SESSION' });
+        if (lastSessionRes?.lastSession) {
+          setLastSession(lastSessionRes.lastSession);
+          setSession(null);
+          setPage('report');
+        }
+      } else if (res?.session && !session && page !== 'active') { // If background reports a session, but our state doesn't, and we're not already on active
         setSession(res.session);
-        if (page === 'home' || page === 'start') setPage('active');
-      } else if (!res?.session && page === 'active') {
-        setSession(null);
-        setPage('home');
+        setPage('active');
+      } else if (res?.session && session && res.session.id !== session.id) {
+        // If session changed (e.g., new session started while on settings)
+        setSession(res.session);
+        setPage('active');
       }
     }, 2000);
     return () => clearInterval(id);
-  }, [page]);
+  }, [session, page]); // Depend on session and page to re-evaluate logic
+
+  async function handleSessionEnd() {
+    // This is called when session ends via "I'm Done" or admin override from ActiveSessionPage
+    const lastSessionRes = await chrome.runtime.sendMessage({ type: 'GET_LAST_SESSION' });
+    if (lastSessionRes?.lastSession) {
+      setLastSession(lastSessionRes.lastSession);
+      setSession(null);
+      setPage('report');
+    }
+  }
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#0a0a0f]">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-900/50">
-            <LockSVG size={20} />
+          <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
+            <Lock size={20} /> {/* Use Lock icon from lucide-react */}
           </div>
           <div className="spinner w-5 h-5" />
         </div>
@@ -54,13 +77,22 @@ export default function App() {
 
   if (!user) return <AuthPage onAuth={setUser} />;
 
+  // Render SessionReportPage if a session just ended
+  if (page === 'report' && lastSession) {
+    return (
+      <SessionReportPage
+        session={lastSession}
+        onDone={() => { setLastSession(null); setPage('home'); }}
+      />
+    );
+  }
+
   if (page === 'settings') {
     return (
       <SettingsPage
         user={user}
         onBack={() => setPage(session ? 'active' : 'home')}
         onLogout={() => { setUser(null); setPage('home'); }}
-        onSessionEnd={() => { setSession(null); setPage('home'); }}
       />
     );
   }
@@ -71,7 +103,7 @@ export default function App() {
         session={session}
         user={user}
         onSessionUpdate={setSession}
-        onSessionEnd={() => { setSession(null); setPage('home'); }}
+        onSessionEnd={handleSessionEnd} // Pass the new handler
         onSettings={() => setPage('settings')}
       />
     );
@@ -93,14 +125,5 @@ export default function App() {
       onStart={() => setPage('start')}
       onSettings={() => setPage('settings')}
     />
-  );
-}
-
-function LockSVG({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
   );
 }
