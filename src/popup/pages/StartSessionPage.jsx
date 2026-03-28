@@ -213,7 +213,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
               <textarea
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                placeholder="Describe your goal for this session. Be specific — the AI will verify you actually completed it."
+                placeholder="Describe your goal for this session. Be specific, the AI will verify you actually completed it."
                 className="w-full px-4 py-3 bg-black/30 border border-red-500/30 rounded-xl text-white text-sm placeholder-gray-500 resize-none h-32 transition-colors"
                 autoFocus
               />
@@ -350,7 +350,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
             </div>
 
             {sites.length === 0 ? (
-              <p className="text-center text-xs text-gray-600 py-4">No sites added — all will be blocked.</p>
+              <p className="text-center text-xs text-gray-600 py-4">No sites added. All will be blocked.</p>
             ) : (
               <div className="space-y-2">
                 {sites.map((s) => (
@@ -416,7 +416,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
               />
               {adminPwd && (
-                <p className="text-xs text-amber-500/80 mt-2">⚠ Write this down — there is no recovery option.</p>
+                <p className="text-xs text-amber-500/80 mt-2">Write this down, there is no recovery option.</p>
               )}
             </div>
           </div>
@@ -444,7 +444,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 Allowed Sites ({sites.length})
               </p>
               {sites.length === 0
-                ? <p className="text-sm text-gray-400">None — all sites blocked</p>
+                ? <p className="text-sm text-gray-400">None</p>
                 : <ul className="space-y-1">{sites.map((s) => <li key={s.id} className="text-sm text-white truncate">{s.url}</li>)}</ul>
               }
             </div>
@@ -458,7 +458,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
             </div>
 
             <div className="rounded-xl p-3.5 border border-amber-700/40 bg-amber-900/20">
-              <p className="text-amber-400 text-xs font-semibold mb-1">⚠ About to lock down</p>
+              <p className="text-amber-400 text-xs font-semibold mb-1">About to lock down</p>
               <p className="text-amber-500/70 text-xs">All unlisted websites will be blocked. The AI will scan your browsing history to verify you completed your goal.</p>
             </div>
 

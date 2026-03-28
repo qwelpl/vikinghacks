@@ -119,7 +119,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
             
             <div>
               <label className="block text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-1.5">
-                Your Explanation {hasEvidence ? '(optional but helps)' : '(required — be specific)'}
+                Your Explanation (be specific)
               </label>
               <textarea
                 value={proof}
@@ -127,7 +127,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
                 placeholder={
                   hasEvidence
                     ? 'Describe what you accomplished. The AI can already see your browsing history above.'
-                    : 'No browsing data was recorded — describe specifically what you did, what you produced, scores achieved, etc.'
+                    : 'No browsing data was recorded. Describe specifically what you did, what you produced, scores achieved, etc.'
                 }
                 className="w-full px-3 py-3 bg-[#0a0a0f] border border-[#1f1f2e] rounded-xl text-white text-sm placeholder-[#3d3d4e] resize-none h-24 transition-colors"
                 autoFocus={!hasEvidence}

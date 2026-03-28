@@ -218,7 +218,7 @@ export default function BlockedPage() {
                 <p className="text-gray-400 text-sm mt-3 max-w-sm leading-relaxed">{verdict.reasoning}</p>
               )}
               {verdict.warning && (
-                <p className="text-amber-500/80 text-sm mt-2">⚠ {verdict.warning}</p>
+                <p className="text-amber-500/80 text-sm mt-2">{verdict.warning}</p>
               )}
               <p className="text-gray-600 text-sm mt-4">You may now close this tab.</p>
             </div>

@@ -78,8 +78,6 @@ function isAllowed(url, session) {
   return false;
 }
 
-
-
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   if (details.frameId !== 0) return;
 

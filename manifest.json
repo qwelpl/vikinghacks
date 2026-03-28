@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Warden",
   "version": "1.0.0",
-  "description": "AI-powered lockdown browser — declare your work, get locked in, only escape when you prove it's done.",
+  "description": "AI lockdown browser",
   "permissions": [
     "tabs",
     "storage",
