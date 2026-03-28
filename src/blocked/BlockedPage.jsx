@@ -11,11 +11,7 @@ import {
 
 function getParams() {
   const p = new URLSearchParams(window.location.search);
-  return {
-    url: p.get('url') || '',
-    tabId: p.get('tabId'),
-    screenshot: p.get('screenshot') || '',
-  };
+  return { url: p.get('url') || '', tabId: p.get('tabId') };
 }
 
 function getDomain(url) {
@@ -27,7 +23,7 @@ function getDomain(url) {
 }
 
 export default function BlockedPage() {
-  const { url, tabId, screenshot } = getParams();
+  const { url, tabId } = getParams();
   const domain = getDomain(url);
   const [session, setSession] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -72,20 +68,10 @@ export default function BlockedPage() {
   const elapsed = session ? now - session.startTime : 0;
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden px-4">
-      {screenshot && (
-        <>
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${screenshot})`, filter: 'blur(12px) brightness(0.4)' }}
-          />
-          <div className="absolute inset-0 bg-black/50" />
-        </>
-      )}
-
+    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center relative overflow-hidden px-4">
       <div className="relative z-10 w-full max-w-lg">
         {view === 'blocked' && (
-          <div className="text-center animate-fade-in">
+          <div className="text-center">
             <div className="flex justify-center mb-8">
               <div
                 className="w-24 h-24 rounded-3xl flex items-center justify-center animate-glow animate-float"
@@ -95,8 +81,8 @@ export default function BlockedPage() {
               </div>
             </div>
 
-            <h1 className="text-5xl font-black text-white tracking-tight mb-3">Are you on task?</h1>
-            <p className="text-xl text-gray-400 mb-2">This site isn't on your allowed list.</p>
+            <h1 className="text-5xl font-black text-white tracking-tight mb-3">Blocked.</h1>
+            <p className="text-xl text-gray-400 mb-2">You're locked in right now.</p>
 
             <div className="inline-flex items-center gap-2 bg-red-900/30 border border-red-800/40 rounded-full px-4 py-2 mb-8">
               <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px #ef4444' }} />
@@ -146,7 +132,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'form' && (
-          <div className="animate-fade-in">
+          <div>
             <button
               onClick={() => setView('blocked')}
               className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 text-sm transition-colors"
@@ -206,7 +192,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'judging' && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div className="w-20 h-20 rounded-full bg-amber-900/30 border-2 border-amber-700/50 flex items-center justify-center">
               <div className="spinner w-8 h-8" style={{ borderTopColor: '#f59e0b', borderColor: 'rgba(245,158,11,0.2)' }} />
             </div>
@@ -218,7 +204,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'approved' && verdict && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(185, 28, 28, 0.15)', border: '2px solid rgba(185, 28, 28, 0.4)', boxShadow: '0 0 40px rgba(185, 28, 28, 0.2)' }}
@@ -240,7 +226,7 @@ export default function BlockedPage() {
         )}
 
         {view === 'denied' && verdict && (
-          <div className="flex flex-col items-center text-center gap-6 animate-fade-in">
+          <div className="flex flex-col items-center text-center gap-6">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(239,68,68,0.1)', border: '2px solid rgba(239,68,68,0.3)' }}
