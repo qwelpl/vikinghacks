@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
 import { suggestWebsites } from '../../utils/aiApi';
@@ -21,17 +21,19 @@ function useStickyState(defaultValue, key) {
     });
   }, [key]);
 
-  useEffect(() => {
+  const setStickyValue = useCallback((newValue) => {
     if (hydrated) {
       chrome.storage.local.get(DRAFT_KEY, (result) => {
         const draft = result[DRAFT_KEY] || {};
-        chrome.storage.local.set({ [DRAFT_KEY]: { ...draft, [key]: value } });
+        chrome.storage.local.set({ [DRAFT_KEY]: { ...draft, [key]: newValue } });
       });
     }
-  }, [value, key, hydrated]);
+    setValue(newValue);
+  }, [key, hydrated]);
 
-  return [value, setValue];
+  return [value, setStickyValue];
 }
+
 
 function Steps({ current, total }) {
   return (
