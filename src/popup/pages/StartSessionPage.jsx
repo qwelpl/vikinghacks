@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
-import { suggestWebsites } from '../../utils/aiApi';
+import { suggestWebsites, suggestTasks } from '../../utils/aiApi';
 import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
 
 const DRAFT_KEY = 'warden_session_draft';
-
 
 function useStickyState(defaultValue, key) {
   const [value, setValue] = useState(defaultValue);
@@ -33,7 +32,6 @@ function useStickyState(defaultValue, key) {
 
   return [value, setStickyValue];
 }
-
 
 function Steps({ current, total }) {
   return (
@@ -76,6 +74,8 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [taskSuggestions, setTaskSuggestions] = useState([]);
+  const [loadingTaskSuggestions, setLoadingTaskSuggestions] = useState(false);
   const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       if (sites.find(s => s.url === hostname)) return;
       setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
     } catch (e) {
-      
+      // Invalid URL, do nothing
     }
   }
 
@@ -116,6 +116,19 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       console.error(e);
     } finally {
       setLoadingSuggestions(false);
+    }
+  }
+
+  async function generateTaskSuggestions() {
+    setLoadingTaskSuggestions(true);
+    setTaskSuggestions([]);
+    try {
+      const suggested = await suggestTasks(goal);
+      setTaskSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTaskSuggestions(false);
     }
   }
 
@@ -154,7 +167,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       const res = await chrome.runtime.sendMessage({ type: 'START_SESSION', session });
       if (res?.error) throw new Error(res.error);
       
-      
       await chrome.storage.local.remove(DRAFT_KEY);
 
       onSessionStart(session);
@@ -166,7 +178,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
-      
       <div className="flex items-center gap-3 px-4 py-4 border-b border-red-500/30 shrink-0">
         <button
           onClick={step === 0 ? onBack : () => setStep(step - 1)}
@@ -183,10 +194,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         </div>
       </div>
 
-      
       <div className="flex-1 overflow-y-auto px-4 py-4">
-
-        
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div>
@@ -204,10 +212,27 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 The AI will scan the pages you visit during your session and cross-reference them against this goal to verify completion.
               </p>
             </div>
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <button
+                onClick={generateTaskSuggestions}
+                disabled={loadingTaskSuggestions}
+                className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {loadingTaskSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Task Suggestions</>}
+              </button>
+              {taskSuggestions.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {taskSuggestions.map(s => (
+                    <button key={s} onClick={() => setGoal(s)} className="px-2 py-1 bg-red-900/40 text-red-300 text-xs rounded-md hover:bg-red-800/40">
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -269,7 +294,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 disabled={loadingSuggestions}
                 className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
               >
-                {loadingSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Suggestions</>}
+                {loadingSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Site Suggestions</>}
               </button>
               {suggestions.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
@@ -305,7 +330,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        
         {step === 2 && (
           <div className="space-y-4 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -356,7 +380,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -396,7 +419,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         )}
       </div>
 
-      
       <div className="px-4 py-4 border-t border-red-500/30 shrink-0">
         {step < STEPS.length - 1 ? (
           <button
