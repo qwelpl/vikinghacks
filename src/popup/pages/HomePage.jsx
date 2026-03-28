@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSessionHistory } from '../../utils/storage';
 import { formatDuration, timeAgo } from '../../utils/helpers';
+import { Lock, Settings, Plus } from 'lucide-react';
 
 export default function HomePage({ user, onStart, onSettings }) {
   const [history, setHistory] = useState([]);
@@ -17,29 +18,23 @@ export default function HomePage({ user, onStart, onSettings }) {
   }, [user.id]);
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0a0a0f] animate-fade-in overflow-hidden">
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#1f1f2e] shrink-0">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-red-500/30 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <rect x="3" y="11" width="18" height="11" rx="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-900/50">
+            <Lock size={13} />
           </div>
           <span className="font-bold text-white text-[15px]">Warden</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#6b6a7b]">@{user.username}</span>
+          <span className="text-xs text-gray-400">@{user.username}</span>
           <button
             onClick={onSettings}
-            className="p-1.5 text-[#6b6a7b] hover:text-white hover:bg-[#1f1f2e] rounded-lg transition-colors"
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
             title="Settings"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" />
-            </svg>
+            <Settings size={15} />
           </button>
         </div>
       </div>
@@ -52,25 +47,20 @@ export default function HomePage({ user, onStart, onSettings }) {
             onClick={onStart}
             className="w-full text-left rounded-2xl p-5 transition-all duration-200 group"
             style={{
-              background: 'linear-gradient(135deg, #5b21b6 0%, #4c1d95 50%, #3b0764 100%)',
-              boxShadow: '0 8px 32px rgba(124,58,237,0.25)',
+              background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)',
+              boxShadow: '0 8px 32px rgba(185, 28, 28, 0.25)',
             }}
           >
             <div className="flex items-start justify-between mb-4">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <rect x="3" y="11" width="18" height="11" rx="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
+                <Lock size={18} />
               </div>
               <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors flex items-center justify-center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
+                <Plus size={14} />
               </div>
             </div>
             <h2 className="text-[17px] font-bold text-white mb-1">Start a Session</h2>
-            <p className="text-sm text-violet-200/60">Declare your goal, lock in, get it done.</p>
+            <p className="text-sm text-red-200/60">Declare your goal, lock in, get it done.</p>
           </button>
         </div>
 
@@ -83,10 +73,10 @@ export default function HomePage({ user, onStart, onSettings }) {
                 { label: 'Completed', value: stats.completed, emoji: '✅' },
                 { label: 'Focus Time', value: formatDuration(stats.totalTime), emoji: '⏱' },
               ].map((s) => (
-                <div key={s.label} className="bg-[#13131a] rounded-xl p-3 border border-[#1f1f2e]">
+                <div key={s.label} className="bg-black/30 rounded-xl p-3 border border-red-500/30">
                   <div className="text-base mb-1">{s.emoji}</div>
                   <div className="text-sm font-bold text-white">{s.value}</div>
-                  <div className="text-[11px] text-[#6b6a7b] mt-0.5">{s.label}</div>
+                  <div className="text-[11px] text-gray-400 mt-0.5">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -96,10 +86,10 @@ export default function HomePage({ user, onStart, onSettings }) {
         {/* Recent sessions */}
         {history.length > 0 && (
           <div className="px-4 pb-4">
-            <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">Recent</p>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Recent</p>
             <div className="space-y-2">
               {history.map((s) => (
-                <div key={s.id} className="bg-[#13131a] rounded-xl p-3.5 border border-[#1f1f2e]">
+                <div key={s.id} className="bg-black/30 rounded-xl p-3.5 border border-red-500/30">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <p className="text-sm font-medium text-white line-clamp-1 flex-1">
                       {s.goal || s.tasks?.[0]?.description || 'Focus Session'}
@@ -110,13 +100,13 @@ export default function HomePage({ user, onStart, onSettings }) {
                           ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800/50'
                           : s.status === 'overridden'
                           ? 'bg-amber-900/30 text-amber-500 border border-amber-800/40'
-                          : 'bg-[#1f1f2e] text-[#6b6a7b]'
+                          : 'bg-gray-800 text-gray-400'
                       }`}
                     >
                       {s.status === 'completed' ? '✓ Done' : s.status === 'overridden' ? 'Override' : 'Ended'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-[#6b6a7b]">
+                  <div className="flex items-center gap-3 text-[11px] text-gray-400">
                     <span>⏱ {formatDuration((s.endTime || Date.now()) - s.startTime)}</span>
                     <span>{timeAgo(s.startTime)}</span>
                     {(s.pageActivity?.length > 0) && (
@@ -132,8 +122,8 @@ export default function HomePage({ user, onStart, onSettings }) {
         {history.length === 0 && (
           <div className="flex flex-col items-center py-10 text-center px-4">
             <p className="text-3xl mb-3">🔒</p>
-            <p className="text-sm text-[#6b6a7b]">No sessions yet.</p>
-            <p className="text-xs text-[#3d3d4e] mt-1">Start your first session above.</p>
+            <p className="text-sm text-gray-400">No sessions yet.</p>
+            <p className="text-xs text-gray-600 mt-1">Start your first session above.</p>
           </div>
         )}
       </div>
