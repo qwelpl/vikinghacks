@@ -156,7 +156,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
 
         {/* ── Judging ── */}
         {step === 'judging' && (
-          <div className="flex flex-col items-center py-12 gap-4 animate-fade-in">
+          <div className="flex flex-col items-center justify-center gap-4" style={{ minHeight: '320px' }}>
             <div className="w-14 h-14 rounded-full bg-violet-900/30 border border-violet-700/50 flex items-center justify-center">
               <div className="spinner w-6 h-6" />
             </div>
