@@ -13,7 +13,7 @@ function getDomain(url) {
   catch { return url; }
 }
 
-// Floating background particles
+
 function Particles() {
   const particles = [
     { size: 200, x: 10, y: 20, delay: 0 },
@@ -48,7 +48,7 @@ export default function BlockedPage() {
   const domain = getDomain(url);
   const [session, setSession] = useState(null);
   const [now, setNow] = useState(Date.now());
-  const [view, setView] = useState('blocked'); // blocked | form | judging | approved | denied
+  const [view, setView] = useState('blocked'); 
   const [requestUrl, setRequestUrl] = useState(url);
   const [reason, setReason] = useState('');
   const [verdict, setVerdict] = useState(null);

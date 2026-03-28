@@ -48,7 +48,7 @@ export function isUrlMatch(url, pattern) {
 export function isUrlAllowed(url, session) {
   if (!url || !session) return true;
 
-  // Always allow extension/browser internal pages
+  
   if (
     url.startsWith('chrome-extension://') ||
     url.startsWith('chrome://') ||
@@ -57,18 +57,18 @@ export function isUrlAllowed(url, session) {
     url.startsWith('edge://')
   ) return true;
 
-  // Whitelist
+  
   for (const item of session.whitelist || []) {
     if (isUrlMatch(url, item)) return true;
   }
 
-  // Active emergency access
+  
   const now = Date.now();
   for (const ea of session.emergencyAccess || []) {
     if (ea.grantedUntil > now && isUrlMatch(url, ea.url)) return true;
   }
 
-  // Allowed sites
+  
   for (const site of session.allowedSites || []) {
     if (isUrlMatch(url, site.url)) return true;
   }

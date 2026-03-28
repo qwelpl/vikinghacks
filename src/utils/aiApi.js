@@ -99,7 +99,7 @@ duration must be 5, 10, 15, or 30 (minutes). Only include if approved.`;
 
   const msg = `Session goal:\n${goal}\n\nRequested URL: ${requestedUrl}\n\nUser's reason:\n${reason}`;
 
-  // Log the bypass attempt
+  
   await chrome.runtime.sendMessage({
     type: 'LOG_BYPASS_ATTEMPT',
     request: { url: requestedUrl, reason, time: Date.now() },

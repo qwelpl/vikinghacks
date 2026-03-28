@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
 
 const DRAFT_KEY = 'warden_session_draft';
 
-// A custom hook to keep state in chrome.storage.local
+
 function useStickyState(defaultValue, key) {
   const [value, setValue] = useState(defaultValue);
   const [hydrated, setHydrated] = useState(false);
@@ -95,7 +95,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       if (sites.find(s => s.url === hostname)) return;
       setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
     } catch (e) {
-      // Invalid URL, do nothing
+      
     }
   }
 
@@ -154,7 +154,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       const res = await chrome.runtime.sendMessage({ type: 'START_SESSION', session });
       if (res?.error) throw new Error(res.error);
       
-      // Clear the draft after starting the session
+      
       await chrome.storage.local.remove(DRAFT_KEY);
 
       onSessionStart(session);

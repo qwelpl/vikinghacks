@@ -42,7 +42,7 @@ function EvidenceItem({ page }) {
 
 export default function ProofModal({ session, onClose, onApproved }) {
   const [proof, setProof] = useState('');
-  const [step, setStep] = useState('form'); // form | judging | approved | rejected
+  const [step, setStep] = useState('form'); 
   const [verdict, setVerdict] = useState(null);
   const [error, setError] = useState('');
 

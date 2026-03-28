@@ -5,7 +5,7 @@ import { judgeEmergencyRequest } from '../../utils/aiApi';
 export default function EmergencyModal({ session, onClose, onGranted }) {
   const [url, setUrl] = useState('');
   const [reason, setReason] = useState('');
-  const [step, setStep] = useState('form'); // form | judging | result
+  const [step, setStep] = useState('form'); 
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
