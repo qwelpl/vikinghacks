@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
+import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react';
 
 function Steps({ current, total }) {
   return (
@@ -9,7 +10,7 @@ function Steps({ current, total }) {
         <div
           key={i}
           className={`h-1 rounded-full transition-all duration-300 ${
-            i < current ? 'bg-violet-500' : i === current ? 'bg-violet-400' : 'bg-[#1f1f2e]'
+            i < current ? 'bg-red-500' : i === current ? 'bg-red-400' : 'bg-white/10'
           }`}
           style={{ width: i === current ? 24 : 10 }}
         />
@@ -21,7 +22,7 @@ function Steps({ current, total }) {
 function Toggle({ value, onChange }) {
   return (
     <button type="button" onClick={() => onChange(!value)}
-      className={`relative w-11 h-6 rounded-full transition-colors ${value ? 'bg-violet-600' : 'bg-[#2d2d3e]'}`}>
+      className={`relative w-11 h-6 rounded-full transition-colors ${value ? 'bg-red-600' : 'bg-white/10'}`}>
       <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   );
@@ -93,21 +94,19 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0a0a0f] animate-fade-in overflow-hidden">
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-[#1f1f2e] shrink-0">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-red-500/30 shrink-0">
         <button
           onClick={step === 0 ? onBack : () => setStep(step - 1)}
-          className="p-1.5 text-[#8b8a9b] hover:text-white hover:bg-[#1f1f2e] rounded-lg transition-colors"
+          className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ChevronLeft size={16} />
         </button>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1.5">
             <h2 className="text-sm font-semibold text-white">{STEPS[step]}</h2>
-            <span className="text-xs text-[#6b6a7b]">{step + 1} / {STEPS.length}</span>
+            <span className="text-xs text-gray-400">{step + 1} / {STEPS.length}</span>
           </div>
           <Steps current={step} total={STEPS.length} />
         </div>
@@ -120,17 +119,17 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div>
-              <label className="block text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                 What do you need to get done?
               </label>
               <textarea
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 placeholder="Describe your goal for this session. Be specific — the AI will verify you actually completed it."
-                className="w-full px-4 py-3 bg-[#13131a] border border-[#1f1f2e] rounded-xl text-white text-sm placeholder-[#3d3d4e] resize-none h-32 transition-colors"
+                className="w-full px-4 py-3 bg-black/30 border border-red-500/30 rounded-xl text-white text-sm placeholder-gray-500 resize-none h-32 transition-colors"
                 autoFocus
               />
-              <p className="text-xs text-[#4a4a5a] mt-2 leading-relaxed">
+              <p className="text-xs text-gray-500 mt-2 leading-relaxed">
                 The AI will scan the pages you visit during your session and cross-reference them against this goal to verify completion.
               </p>
             </div>
@@ -140,17 +139,17 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         {/* ── Step 1: Allowed Sites ── */}
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
-            <p className="text-xs text-[#6b6a7b] leading-relaxed">
+            <p className="text-xs text-gray-400 leading-relaxed">
               Everything is blocked by default. Add only what you genuinely need.
             </p>
 
-            <div className="bg-[#13131a] rounded-xl p-3.5 border border-[#1f1f2e] space-y-2">
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
               <input
                 type="text"
                 value={siteUrl}
                 onChange={(e) => setSiteUrl(e.target.value)}
                 placeholder="Website (e.g. docs.google.com)"
-                className="w-full px-3 py-2.5 bg-[#0a0a0f] border border-[#1f1f2e] rounded-lg text-white text-sm placeholder-[#3d3d4e] transition-colors"
+                className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
                 onKeyDown={(e) => e.key === 'Enter' && addSite()}
               />
               <input
@@ -158,34 +157,32 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 value={siteReason}
                 onChange={(e) => setSiteReason(e.target.value)}
                 placeholder="Why do you need this? (optional)"
-                className="w-full px-3 py-2.5 bg-[#0a0a0f] border border-[#1f1f2e] rounded-lg text-white text-sm placeholder-[#3d3d4e] transition-colors"
+                className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
                 onKeyDown={(e) => e.key === 'Enter' && addSite()}
               />
               <button
                 onClick={addSite}
-                className="w-full py-2 bg-violet-600/15 hover:bg-violet-600/25 border border-violet-700/60 text-violet-400 rounded-lg text-sm font-medium transition-colors"
+                className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors"
               >
                 + Add Site
               </button>
             </div>
 
             {sites.length === 0 ? (
-              <p className="text-center text-xs text-[#3d3d4e] py-4">No sites added — all will be blocked.</p>
+              <p className="text-center text-xs text-gray-600 py-4">No sites added — all will be blocked.</p>
             ) : (
               <div className="space-y-2">
                 {sites.map((s) => (
-                  <div key={s.id} className="flex items-start gap-2 bg-[#13131a] rounded-xl px-3.5 py-3 border border-[#1f1f2e]">
+                  <div key={s.id} className="flex items-start gap-2 bg-black/30 rounded-xl px-3.5 py-3 border border-red-500/30">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">{s.url}</p>
-                      {s.reason && <p className="text-xs text-[#6b6a7b] mt-0.5">{s.reason}</p>}
+                      {s.reason && <p className="text-xs text-gray-400 mt-0.5">{s.reason}</p>}
                     </div>
                     <button
                       onClick={() => setSites(sites.filter((x) => x.id !== s.id))}
-                      className="p-1 text-[#3d3d4e] hover:text-red-400 transition-colors shrink-0"
+                      className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
+                      <X size={12} />
                     </button>
                   </div>
                 ))}
@@ -197,11 +194,11 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         {/* ── Step 2: Settings ── */}
         {step === 2 && (
           <div className="space-y-4 animate-fade-in">
-            <div className="bg-[#13131a] rounded-xl p-4 border border-[#1f1f2e]">
+            <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="text-sm font-semibold text-white">Break Schedule</h3>
-                  <p className="text-xs text-[#6b6a7b] mt-0.5">Scheduled breaks improve sustained focus</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Scheduled breaks improve sustained focus</p>
                 </div>
                 <Toggle value={breaksEnabled} onChange={setBreaksEnabled} />
               </div>
@@ -212,11 +209,11 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                     { label: 'Break length', value: breakDuration, onChange: setBreakDuration, options: [5, 10, 15, 20] },
                   ].map((f) => (
                     <div key={f.label}>
-                      <label className="block text-xs text-[#6b6a7b] mb-1.5">{f.label}</label>
+                      <label className="block text-xs text-gray-400 mb-1.5">{f.label}</label>
                       <select
                         value={f.value}
                         onChange={(e) => f.onChange(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#1f1f2e] rounded-lg text-white text-sm transition-colors"
+                        className="w-full px-3 py-2 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm transition-colors"
                       >
                         {f.options.map((v) => <option key={v} value={v}>{v} min</option>)}
                       </select>
@@ -226,9 +223,9 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
               )}
             </div>
 
-            <div className="bg-[#13131a] rounded-xl p-4 border border-[#1f1f2e]">
+            <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
               <h3 className="text-sm font-semibold text-white mb-1">Override Password</h3>
-              <p className="text-xs text-[#6b6a7b] mb-3">
+              <p className="text-xs text-gray-400 mb-3">
                 Emergency escape hatch. Leave empty to disable.
               </p>
               <input
@@ -236,7 +233,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 value={adminPwd}
                 onChange={(e) => setAdminPwd(e.target.value)}
                 placeholder="Leave empty to disable override…"
-                className="w-full px-3 py-2.5 bg-[#0a0a0f] border border-[#1f1f2e] rounded-lg text-white text-sm placeholder-[#3d3d4e] transition-colors"
+                className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
               />
               {adminPwd && (
                 <p className="text-xs text-amber-500/80 mt-2">⚠ Write this down — there is no recovery option.</p>
@@ -248,36 +245,36 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         {/* ── Step 3: Review ── */}
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
-            <div className="bg-[#13131a] rounded-xl p-4 border border-[#1f1f2e]">
-              <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">Goal</p>
+            <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Goal</p>
               <p className="text-sm text-white leading-relaxed">{goal}</p>
             </div>
 
-            <div className="bg-[#13131a] rounded-xl p-4 border border-[#1f1f2e]">
-              <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">
+            <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
                 Allowed Sites ({sites.length})
               </p>
               {sites.length === 0
-                ? <p className="text-sm text-[#6b6a7b]">None — all sites blocked</p>
+                ? <p className="text-sm text-gray-400">None — all sites blocked</p>
                 : <ul className="space-y-1">{sites.map((s) => <li key={s.id} className="text-sm text-white truncate">{s.url}</li>)}</ul>
               }
             </div>
 
-            <div className="bg-[#13131a] rounded-xl p-4 border border-[#1f1f2e]">
-              <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">Settings</p>
+            <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Settings</p>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-[#6b6a7b]">Breaks</span><span className="text-white">{breaksEnabled ? `Every ${breakInterval}m (${breakDuration}m)` : 'Off'}</span></div>
-                <div className="flex justify-between"><span className="text-[#6b6a7b]">Override</span><span className="text-white">{adminPwd ? '✓ Set' : 'Disabled'}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Breaks</span><span className="text-white">{breaksEnabled ? `Every ${breakInterval}m (${breakDuration}m)` : 'Off'}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Override</span><span className="text-white">{adminPwd ? '✓ Set' : 'Disabled'}</span></div>
               </div>
             </div>
 
-            <div className="rounded-xl p-3.5 border border-amber-700/40" style={{ background: 'rgba(120,53,15,0.15)' }}>
+            <div className="rounded-xl p-3.5 border border-amber-700/40 bg-amber-900/20">
               <p className="text-amber-400 text-xs font-semibold mb-1">⚠ About to lock down</p>
               <p className="text-amber-500/70 text-xs">All unlisted websites will be blocked. The AI will scan your browsing history to verify you completed your goal.</p>
             </div>
 
             {error && (
-              <div className="px-4 py-2.5 bg-red-950/40 border border-red-800/60 rounded-xl">
+              <div className="px-4 py-2.5 bg-red-900/40 border border-red-800/60 rounded-xl">
                 <p className="text-red-400 text-xs">{error}</p>
               </div>
             )}
@@ -286,32 +283,28 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-[#1f1f2e] shrink-0">
+      <div className="px-4 py-4 border-t border-red-500/30 shrink-0">
         {step < STEPS.length - 1 ? (
           <button
             onClick={() => setStep(step + 1)}
             disabled={!canNext}
-            className="w-full py-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+            className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
           >
             Continue
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <ChevronRight size={14} />
           </button>
         ) : (
           <button
             onClick={startSession}
             disabled={loading}
             className="w-full py-3 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#5b21b6)', boxShadow: '0 4px 20px rgba(124,58,237,0.4)' }}
+            style={{ background: 'linear-gradient(135deg,#b91c1c,#991b1b)', boxShadow: '0 4px 20px rgba(185, 28, 28, 0.4)' }}
           >
             {loading ? (
               <><div className="spinner w-4 h-4" /><span>Activating…</span></>
             ) : (
               <>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
+                <Lock size={15} />
                 Lock It Down
               </>
             )}
