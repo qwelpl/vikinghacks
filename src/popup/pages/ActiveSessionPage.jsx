@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { formatTime } from '../../utils/helpers';
+import React, {useEffect, useState} from 'react';
+import {formatTime} from '../../utils/helpers';
 import EmergencyModal from '../components/EmergencyModal';
 import ProofModal from '../components/ProofModal';
-import { Lock, Settings, Coffee, AlertTriangle, Check, Globe } from 'lucide-react';
+import {AlertTriangle, Check, Coffee, Globe, Lock, Settings} from 'lucide-react';
 
 export default function ActiveSessionPage({ session, onSessionEnd, onSettings }) {
   const [now, setNow] = useState(Date.now());
