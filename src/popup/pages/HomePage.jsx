@@ -22,9 +22,8 @@ function computeStreak(sessions) {
 export default function HomePage({ user, onStart, onSettings }) {
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ total: 0, completed: 0, totalTime: 0, streak: 0 });
-// In HomePage.jsx, replace the useEffect with:
-useEffect(() => {
-  function refetch() {
+
+  useEffect(() => {
     getSessionHistory().then((h) => {
       const all = (h || []).filter((s) => s.userId === user.id);
       setHistory(all.slice(0, 5));
@@ -33,12 +32,7 @@ useEffect(() => {
       const streak = computeStreak(all);
       setStats({ total: all.length, completed, totalTime, streak });
     });
-  }
-
-  refetch(); // run on mount
-  window.addEventListener('focus', refetch); // re-run when popup regains focus
-  return () => window.removeEventListener('focus', refetch);
-}, [user.id]);
+  }, [user.id]);
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
