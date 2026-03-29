@@ -5,6 +5,12 @@ import HomePage from './pages/HomePage';
 import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
+<<<<<<< Updated upstream
+=======
+import SessionReportPage from './pages/SessionReportPage';
+import DashboardPage from './pages/DashboardPage'; // Import DashboardPage
+import {Lock} from 'lucide-react';
+>>>>>>> Stashed changes
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -69,9 +75,14 @@ export default function App() {
     }
   }
 
+  function handleViewSession(sessionToView) {
+    setLastSession(sessionToView);
+    setPage('report');
+  }
+
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#0a0a0f]">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-900/50">
             <Lock size={20} /> {/* Use Lock icon from lucide-react */}
@@ -100,7 +111,16 @@ export default function App() {
         user={user}
         onBack={() => navigateTo(session ? 'active' : 'home')}
         onLogout={() => { setUser(null); navigateTo('home'); }}
-        onSessionEnd={() => { setSession(null); navigateTo('home'); }}
+      />
+    );
+  }
+
+  if (page === 'dashboard') { // New dashboard page
+    return (
+      <DashboardPage
+        user={user}
+        onBack={() => navigateTo('home')}
+        onViewSession={handleViewSession} // Pass the new handler
       />
     );
   }
@@ -132,15 +152,7 @@ export default function App() {
       user={user}
       onStart={() => navigateTo('start')}
       onSettings={() => navigateTo('settings')}
+      onDashboard={() => navigateTo('dashboard')} // Pass onDashboard prop
     />
-  );
-}
-
-function LockSVG({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
   );
 }
