@@ -1,7 +1,13 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {v4 as uuidv4} from 'uuid';
-import {hashPassword} from '../../utils/helpers';
-import {ChevronLeft, ChevronRight, Lock, Sparkles, X} from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { hashPassword } from '../../utils/helpers';
+<<<<<<< Updated upstream
+import { suggestWebsites, suggestTasks } from '../../utils/aiApi';
+import { ChevronLeft, ChevronRight, Lock, X, Sparkles, Plus } from 'lucide-react';
+=======
+import { suggestWebsites } from '../../utils/aiApi'; // Corrected import
+import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
+>>>>>>> Stashed changes
 
 const DRAFT_KEY = 'warden_session_draft';
 
@@ -62,6 +68,12 @@ const STEPS = ['Your Goal', 'Allowed Sites', 'Settings', 'Review & Lock'];
 export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [step, setStep] = useStickyState(0, 'step');
   const [goal, setGoal] = useStickyState('', 'goal');
+<<<<<<< Updated upstream
+  const [tasks, setTasks] = useStickyState([], 'tasks'); 
+  const [newTaskInput, setNewTaskInput] = useState(''); 
+=======
+  // Removed tasks state and related logic as per previous request
+>>>>>>> Stashed changes
   const [sites, setSites] = useStickyState([], 'sites');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteReason, setSiteReason] = useState('');
@@ -71,6 +83,13 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [adminPwd, setAdminPwd] = useStickyState('', 'adminPwd');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+<<<<<<< Updated upstream
+  const [taskSuggestions, setTaskSuggestions] = useState([]);
+  const [loadingTaskSuggestions, setLoadingTaskSuggestions] = useState(false);
+=======
+>>>>>>> Stashed changes
   const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
@@ -90,6 +109,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       if (sites.find(s => s.url === hostname)) return;
       setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
     } catch (e) {
+      // Invalid URL, do nothing
     }
   }
 
@@ -100,6 +120,45 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     setSiteReason('');
   }
 
+<<<<<<< Updated upstream
+  function handleAddManualTask() {
+    if (newTaskInput.trim()) {
+      setTasks([...tasks, { id: uuidv4(), description: newTaskInput.trim() }]);
+      setNewTaskInput('');
+    }
+  }
+
+=======
+>>>>>>> Stashed changes
+  async function generateSuggestions() {
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const suggested = await suggestWebsites(goal);
+      setSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }
+
+<<<<<<< Updated upstream
+  async function generateTaskSuggestions() {
+    setLoadingTaskSuggestions(true);
+    setTaskSuggestions([]);
+    try {
+      const suggested = await suggestTasks(goal);
+      setTaskSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTaskSuggestions(false);
+    }
+  }
+
+=======
+>>>>>>> Stashed changes
   async function startSession() {
     setLoading(true);
     setError('');
@@ -113,7 +172,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         id: uuidv4(),
         userId: user.id,
         goal: goal.trim(),
-        tasks: tasks,
+        tasks: [], // tasks state remains, but always empty now as per removal of task entry
         allowedSites: sites,
         whitelist: ['chrome://newtab', 'chrome://extensions', 'chrome://settings'],
         breaks: {
@@ -147,6 +206,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
+      
       <div className="flex items-center gap-3 px-4 py-4 border-b border-red-500/30 shrink-0">
         <button
           onClick={step === 0 ? onBack : () => setStep(step - 1)}
@@ -163,7 +223,10 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         </div>
       </div>
 
+      
       <div className="flex-1 overflow-y-auto px-4 py-4">
+
+        
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div>
@@ -181,9 +244,61 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
                 The AI will scan the pages you visit during your session and cross-reference them against this goal to verify completion.
               </p>
             </div>
+            
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Manual Task Entry</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newTaskInput}
+                  onChange={(e) => setNewTaskInput(e.target.value)}
+                  placeholder="Add a task"
+                  className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddManualTask()}
+                />
+                <button
+                  onClick={handleAddManualTask}
+                  className="py-2 px-4 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={14} /> Add
+                </button>
+              </div>
+              {tasks.length > 0 && (
+                <ul className="text-sm text-gray-300 list-disc list-inside mt-2">
+                  {tasks.map((t) => (
+                    <li key={t.id} className="flex items-center justify-between">
+                      <span>{t.description}</span>
+                      <button onClick={() => setTasks(tasks.filter(task => task.id !== t.id))} className="p-1 text-gray-600 hover:text-red-400 transition-colors">
+                        <X size={12} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <button
+                onClick={generateTaskSuggestions}
+                disabled={loadingTaskSuggestions}
+                className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {loadingTaskSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Task Suggestions</>}
+              </button>
+              {taskSuggestions.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {taskSuggestions.map(s => (
+                    <button key={s} onClick={() => setTasks([...tasks, { id: uuidv4(), description: s }])} className="px-2 py-1 bg-red-900/40 text-red-300 text-xs rounded-md hover:bg-red-800/40">
+                      + {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
+        
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -281,6 +396,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
+        
         {step === 2 && (
           <div className="space-y-4 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -331,6 +447,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
+
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -340,19 +457,10 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                Tasks ({tasks.length})
+                Tasks
               </p>
-              {tasks.length === 0
-                ? <p className="text-sm text-gray-400">No specific tasks set.</p>
-                : <ul className="space-y-1">{tasks.map((t) => (
-                    <li key={t.id} className="flex items-center justify-between gap-2">
-                      <span className="text-sm text-white truncate flex-1">{t.description}</span>
-                      <button onClick={() => setTasks(tasks.filter(x => x.id !== t.id))} className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0">
-                        <X size={12} />
-                      </button>
-                    </li>
-                  ))}</ul>
-              }
+              {/* Removed tasks display, as tasks are no longer individually managed */}
+              <p className="text-sm text-gray-400">No specific tasks set. Goal is primary focus.</p>
             </div>
 
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">

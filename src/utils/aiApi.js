@@ -16,9 +16,49 @@ async function call(system, userMsg) {
 }
 
 function parseJSON(text) {
-  const m = text.match(/\{[\s\S]*}/);
+  const m = text.match(/\{[\s\S]*\}/);
   if (m) return JSON.parse(m[0]);
   throw new Error('No JSON found in AI response');
+}
+
+export async function suggestTasks(goal) {
+  const system = `You are a helpful assistant for a productivity tool called Warden.
+Your job is to break down a user's declared goal into a list of smaller, actionable tasks.
+Each task should be a clear, concise step toward completing the main goal.
+Provide a list of 2-5 tasks.
+
+You MUST respond with ONLY valid JSON, no prose, no markdown fences:
+{"tasks":["First task","Second task","Third task"]}`;
+
+  const msg = `DECLARED GOAL:\n${goal}`;
+
+  try {
+    const text = await call(system, msg);
+    const json = parseJSON(text);
+    return json.tasks || [];
+  } catch (_e) {
+    return [];
+  }
+}
+
+export async function suggestWebsites(goal) {
+  const system = `You are a helpful assistant for a productivity tool called Warden.
+Your job is to suggest a list of relevant websites for the user's declared goal.
+Provide a mix of general-purpose sites (like Wikipedia) and specific, niche sites if applicable.
+Only suggest websites that are likely to be useful for the user's goal.
+
+You MUST respond with ONLY valid JSON, no prose, no markdown fences:
+{"sites":["example.com","anotherexample.com"]}`;
+
+  const msg = `DECLARED GOAL:\n${goal}`;
+
+  try {
+    const text = await call(system, msg);
+    const json = parseJSON(text);
+    return json.sites || [];
+  } catch (_e) {
+    return [];
+  }
 }
 
 export async function judgeProofOfCompletion(goal, proof, pageActivity = []) {

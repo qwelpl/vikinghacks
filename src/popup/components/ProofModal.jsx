@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import Modal from './Modal';
-import {judgeProofOfCompletion} from '../../utils/aiApi';
-import {getDomain} from '../../utils/helpers';
+import { judgeProofOfCompletion } from '../../utils/aiApi';
+import { getDomain } from '../../utils/helpers';
 
 function EvidenceItem({ page }) {
   const [expanded, setExpanded] = useState(false);
@@ -99,22 +99,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
               )}
             </div>
 
-            
-            <div className="bg-[#0a0a0f] rounded-xl p-3 border border-[#1f1f2e]">
-              <p className="text-[11px] font-semibold text-[#6b6a7b] uppercase tracking-widest mb-2">Your Tasks</p>
-              <ul className="space-y-1.5">
-                {(session.tasks || []).map((t, i) => (
-                  <li key={t.id} className="flex items-start gap-2 text-sm">
-                    <span className={`mt-0.5 shrink-0 ${t.completed ? 'text-emerald-500' : 'text-[#3d3d4e]'}`}>
-                      {t.completed ? '✓' : `${i + 1}.`}
-                    </span>
-                    <span className={t.completed ? 'text-[#6b6a7b] line-through' : 'text-white'}>
-                      {t.description}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+  
 
             
             <div>

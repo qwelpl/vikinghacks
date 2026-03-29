@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {formatTime} from '../../utils/helpers';
+import React, { useState, useEffect } from 'react';
+import { formatTime } from '../../utils/helpers';
 import EmergencyModal from '../components/EmergencyModal';
 import ProofModal from '../components/ProofModal';
-import {AlertTriangle, Check, Coffee, Globe, Lock, Settings} from 'lucide-react';
+import { Lock, Settings, Coffee, AlertTriangle, Check, Globe } from 'lucide-react';
 
 export default function ActiveSessionPage({ session, onSessionEnd, onSettings }) {
   const [now, setNow] = useState(Date.now());
@@ -169,7 +169,7 @@ export default function ActiveSessionPage({ session, onSessionEnd, onSettings })
         <EmergencyModal session={session} onClose={() => setShowEmergency(false)} onGranted={handleGranted} />
       )}
       {showProof && (
-        <ProofModal session={session} onClose={() => setShowProof(false)} onApproved={onSessionEnd} />
+        <ProofModal session={session} onClose={() => setShowProof(false)} onApproved={() => onSessionEnd('completed')} />
       )}
     </div>
   );

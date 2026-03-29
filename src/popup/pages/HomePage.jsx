@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream
+import React, { useState, useEffect } from 'react';
+import { getSessionHistory } from '../../utils/storage';
+import { formatDuration, timeAgo } from '../../utils/helpers';
+import { Lock, Settings, Plus } from 'lucide-react';
+=======
 import React, {useEffect, useState} from 'react';
 import {getSessionHistory} from '../../utils/storage';
 import {formatDuration, timeAgo} from '../../utils/helpers';
-import {Lock, Plus, Settings} from 'lucide-react';
+import {Lock, Plus, Settings, BarChart2} from 'lucide-react'; // Import BarChart2 icon
+>>>>>>> Stashed changes
 
 function computeStreak(sessions) {
   const MS_PER_DAY = 86400000;
@@ -19,7 +26,7 @@ function computeStreak(sessions) {
   return streak;
 }
 
-export default function HomePage({ user, onStart, onSettings }) {
+export default function HomePage({ user, onStart, onSettings, onDashboard }) { // Add onDashboard prop
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ total: 0, completed: 0, totalTime: 0, streak: 0 });
 
@@ -46,6 +53,13 @@ export default function HomePage({ user, onStart, onSettings }) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-400">@{user.username}</span>
+          <button
+            onClick={onDashboard} // New Dashboard button
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            title="Dashboard"
+          >
+            <BarChart2 size={15} />
+          </button>
           <button
             onClick={onSettings}
             className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -138,7 +152,7 @@ export default function HomePage({ user, onStart, onSettings }) {
                           : 'bg-gray-800 text-gray-400'
                       }`}
                     >
-                      {s.status === 'completed' ? '✓ Done' : s.status === 'overridden' ? 'Override' : 'Ended'}
+                      {s.status === 'completed' ? '✓ Done' : 'Ended'}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-gray-400">
