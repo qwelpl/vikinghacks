@@ -385,18 +385,19 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
               {breaksEnabled && (
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Every', value: breakInterval, onChange: setBreakInterval, options: [30, 45, 60, 90, 120] },
-                    { label: 'Break length', value: breakDuration, onChange: setBreakDuration, options: [5, 10, 15, 20] },
+                    { label: 'Every (min)', value: breakInterval, onChange: setBreakInterval, min: 5, max: 240 },
+                    { label: 'Break length (min)', value: breakDuration, onChange: setBreakDuration, min: 1, max: 60 },
                   ].map((f) => (
                     <div key={f.label}>
                       <label className="block text-xs text-gray-400 mb-1.5">{f.label}</label>
-                      <select
+                      <input
+                        type="number"
+                        min={f.min}
+                        max={f.max}
                         value={f.value}
-                        onChange={(e) => f.onChange(Number(e.target.value))}
+                        onChange={(e) => f.onChange(Math.max(f.min, Math.min(f.max, Number(e.target.value) || f.min)))}
                         className="w-full px-3 py-2 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm transition-colors"
-                      >
-                        {f.options.map((v) => <option key={v} value={v}>{v} min</option>)}
-                      </select>
+                      />
                     </div>
                   ))}
                 </div>

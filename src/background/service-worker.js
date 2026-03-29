@@ -166,6 +166,20 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     chrome.alarms.create('warden-break-end', { delayInMinutes: session.breaks.duration });
   }
 
+  if (alarm.name === 'warden-task-reminder') {
+    const session = await getActiveSession();
+    if (!session) return;
+    const pending = (session.tasks || []).filter((t) => !t.completed);
+    if (pending.length > 0) {
+      chrome.notifications.create('warden-task-reminder', {
+        type: 'basic',
+        iconUrl: chrome.runtime.getURL('icons/icon48.png'),
+        title: `${pending.length} task${pending.length !== 1 ? 's' : ''} remaining`,
+        message: pending[0].description,
+      });
+    }
+  }
+
   if (alarm.name === 'warden-break-end') {
     const session = await getActiveSession();
     if (!session) return;
@@ -295,6 +309,9 @@ async function handle(msg) {
       await setActiveSession(s);
       if (s.breaks?.enabled) {
         chrome.alarms.create('warden-break-start', { delayInMinutes: s.breaks.interval });
+      }
+      if ((s.tasks || []).length > 0) {
+        chrome.alarms.create('warden-task-reminder', { periodInMinutes: 3 });
       }
       return { success: true };
     }
