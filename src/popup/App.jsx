@@ -5,12 +5,9 @@ import HomePage from './pages/HomePage';
 import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
-<<<<<<< Updated upstream
-=======
 import SessionReportPage from './pages/SessionReportPage';
 import DashboardPage from './pages/DashboardPage'; // Import DashboardPage
 import {Lock} from 'lucide-react';
->>>>>>> Stashed changes
 
 export default function App() {
   const [user, setUser] = useState(null);
