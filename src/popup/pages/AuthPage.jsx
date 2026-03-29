@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {login, signup} from '../../utils/auth';
+import React, { useState } from 'react';
+import { signup, login } from '../../utils/auth';
 
 export default function AuthPage({ onAuth }) {
   const [tab, setTab] = useState('login');

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
 import { suggestWebsites, suggestTasks } from '../../utils/aiApi';
-import { ChevronLeft, Lock, X, Sparkles, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock, X, Sparkles, Plus } from 'lucide-react';
 
 const DRAFT_KEY = 'warden_session_draft';
 
@@ -63,6 +63,8 @@ const STEPS = ['Your Goal', 'Allowed Sites', 'Settings', 'Review & Lock'];
 export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [step, setStep] = useStickyState(0, 'step');
   const [goal, setGoal] = useStickyState('', 'goal');
+  const [tasks, setTasks] = useStickyState([], 'tasks'); 
+  const [newTaskInput, setNewTaskInput] = useState(''); 
   const [sites, setSites] = useStickyState([], 'sites');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteReason, setSiteReason] = useState('');
@@ -72,6 +74,10 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [adminPwd, setAdminPwd] = useStickyState('', 'adminPwd');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [taskSuggestions, setTaskSuggestions] = useState([]);
+  const [loadingTaskSuggestions, setLoadingTaskSuggestions] = useState(false);
   const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
@@ -99,6 +105,39 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     addSite(siteUrl, siteReason);
     setSiteUrl('');
     setSiteReason('');
+  }
+
+  function handleAddManualTask() {
+    if (newTaskInput.trim()) {
+      setTasks([...tasks, { id: uuidv4(), description: newTaskInput.trim() }]);
+      setNewTaskInput('');
+    }
+  }
+
+  async function generateSuggestions() {
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const suggested = await suggestWebsites(goal);
+      setSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }
+
+  async function generateTaskSuggestions() {
+    setLoadingTaskSuggestions(true);
+    setTaskSuggestions([]);
+    try {
+      const suggested = await suggestTasks(goal);
+      setTaskSuggestions(suggested);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTaskSuggestions(false);
+    }
   }
 
   async function startSession() {
@@ -181,6 +220,57 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
               <p className="text-xs text-gray-500 mt-2 leading-relaxed">
                 The AI will scan the pages you visit during your session and cross-reference them against this goal to verify completion.
               </p>
+            </div>
+            
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Manual Task Entry</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newTaskInput}
+                  onChange={(e) => setNewTaskInput(e.target.value)}
+                  placeholder="Add a task"
+                  className="w-full px-3 py-2.5 bg-black/50 border border-red-500/30 rounded-lg text-white text-sm placeholder-gray-500 transition-colors"
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddManualTask()}
+                />
+                <button
+                  onClick={handleAddManualTask}
+                  className="py-2 px-4 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={14} /> Add
+                </button>
+              </div>
+              {tasks.length > 0 && (
+                <ul className="text-sm text-gray-300 list-disc list-inside mt-2">
+                  {tasks.map((t) => (
+                    <li key={t.id} className="flex items-center justify-between">
+                      <span>{t.description}</span>
+                      <button onClick={() => setTasks(tasks.filter(task => task.id !== t.id))} className="p-1 text-gray-600 hover:text-red-400 transition-colors">
+                        <X size={12} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="bg-black/30 rounded-xl p-3.5 border border-red-500/30 space-y-2">
+              <button
+                onClick={generateTaskSuggestions}
+                disabled={loadingTaskSuggestions}
+                className="w-full py-2 bg-red-600/15 hover:bg-red-600/25 border border-red-700/60 text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {loadingTaskSuggestions ? <><div className="spinner w-4 h-4" /><span>Generating...</span></> : <><Sparkles size={14} /> AI Task Suggestions</>}
+              </button>
+              {taskSuggestions.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {taskSuggestions.map(s => (
+                    <button key={s} onClick={() => setTasks([...tasks, { id: uuidv4(), description: s }])} className="px-2 py-1 bg-red-900/40 text-red-300 text-xs rounded-md hover:bg-red-800/40">
+                      + {s}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -396,6 +486,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
             className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
           >
             Continue
+            <ChevronRight size={14} />
           </button>
         ) : (
           <button

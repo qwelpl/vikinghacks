@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import Modal from './Modal';
-import {judgeEmergencyRequest} from '../../utils/aiApi';
+import { judgeEmergencyRequest } from '../../utils/aiApi';
 
 export default function EmergencyModal({ session, onClose, onGranted }) {
   const [url, setUrl] = useState('');

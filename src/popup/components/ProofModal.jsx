@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import Modal from './Modal';
-import {judgeProofOfCompletion} from '../../utils/aiApi';
-import {getDomain} from '../../utils/helpers';
+import { judgeProofOfCompletion } from '../../utils/aiApi';
+import { getDomain } from '../../utils/helpers';
 
 function EvidenceItem({ page }) {
   const [expanded, setExpanded] = useState(false);

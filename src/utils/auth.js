@@ -1,6 +1,6 @@
-import {v4 as uuidv4} from 'uuid';
-import {clearCurrentUser, getUsers, setCurrentUser, setUsers} from './storage';
-import {hashPassword} from './helpers';
+import { v4 as uuidv4 } from 'uuid';
+import { getUsers, setUsers, setCurrentUser, clearCurrentUser } from './storage';
+import { hashPassword } from './helpers';
 
 export async function signup(username, password) {
   if (username.length < 3) throw new Error('Username must be at least 3 characters');
