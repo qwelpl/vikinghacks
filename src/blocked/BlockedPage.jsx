@@ -168,7 +168,7 @@ export default function BlockedPage() {
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Be specific - what do you need on this site, and how does it relate to your current task?"
+                  placeholder="Be specific!"
                   className="w-full px-4 py-3.5 bg-black/30 border border-red-500/30 rounded-xl text-white text-sm placeholder-gray-500 resize-none h-32 transition-colors"
                 />
               </div>
@@ -262,7 +262,7 @@ export default function BlockedPage() {
 
       <div className="fixed bottom-6 flex items-center gap-1.5 text-gray-600 text-xs">
         <Lock size={12} />
-        Warden - Stay focused. Stay honest.
+        Warden: Stay focused. Stay honest.
       </div>
     </div>
   );
