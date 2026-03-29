@@ -67,7 +67,7 @@ export default function ProofModal({ session, onClose, onApproved }) {
   }
 
   return (
-    <Modal title="✅ Submit Proof of Completion" onClose={onClose} wide>
+    <Modal title="Submit Proof of Completion" onClose={onClose} wide>
       <div className="px-5 py-4">
 
         
