@@ -134,4 +134,12 @@ export default function App() {
     );
   }
 
+  return (
+    <HomePage
+      user={user}
+      onStart={() => navigateTo('start')}
+      onSettings={() => navigateTo('settings')}
+    />
+  );
+
 }
