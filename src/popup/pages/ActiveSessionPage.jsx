@@ -169,7 +169,7 @@ export default function ActiveSessionPage({ session, onSessionEnd, onSettings })
         <EmergencyModal session={session} onClose={() => setShowEmergency(false)} onGranted={handleGranted} />
       )}
       {showProof && (
-        <ProofModal session={session} onClose={() => setShowProof(false)} onApproved={() => onSessionEnd('completed')} />
+        <ProofModal session={session} onClose={() => setShowProof(false)} onApproved={onSessionEnd} />
       )}
     </div>
   );

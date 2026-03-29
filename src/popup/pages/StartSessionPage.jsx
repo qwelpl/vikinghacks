@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../../utils/helpers';
-<<<<<<< Updated upstream
 import { suggestWebsites, suggestTasks } from '../../utils/aiApi';
 import { ChevronLeft, ChevronRight, Lock, X, Sparkles, Plus } from 'lucide-react';
-=======
-import { suggestWebsites } from '../../utils/aiApi'; // Corrected import
-import { ChevronLeft, ChevronRight, Lock, X, Sparkles } from 'lucide-react';
->>>>>>> Stashed changes
 
 const DRAFT_KEY = 'warden_session_draft';
 
@@ -68,12 +63,8 @@ const STEPS = ['Your Goal', 'Allowed Sites', 'Settings', 'Review & Lock'];
 export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [step, setStep] = useStickyState(0, 'step');
   const [goal, setGoal] = useStickyState('', 'goal');
-<<<<<<< Updated upstream
   const [tasks, setTasks] = useStickyState([], 'tasks'); 
   const [newTaskInput, setNewTaskInput] = useState(''); 
-=======
-  // Removed tasks state and related logic as per previous request
->>>>>>> Stashed changes
   const [sites, setSites] = useStickyState([], 'sites');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteReason, setSiteReason] = useState('');
@@ -85,11 +76,8 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-<<<<<<< Updated upstream
   const [taskSuggestions, setTaskSuggestions] = useState([]);
   const [loadingTaskSuggestions, setLoadingTaskSuggestions] = useState(false);
-=======
->>>>>>> Stashed changes
   const [tabs, setTabs] = useState([]);
 
   useEffect(() => {
@@ -109,7 +97,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
       if (sites.find(s => s.url === hostname)) return;
       setSites([...sites, { id: uuidv4(), url: hostname, reason }]);
     } catch (e) {
-      // Invalid URL, do nothing
     }
   }
 
@@ -120,7 +107,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     setSiteReason('');
   }
 
-<<<<<<< Updated upstream
   function handleAddManualTask() {
     if (newTaskInput.trim()) {
       setTasks([...tasks, { id: uuidv4(), description: newTaskInput.trim() }]);
@@ -128,8 +114,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     }
   }
 
-=======
->>>>>>> Stashed changes
   async function generateSuggestions() {
     setLoadingSuggestions(true);
     setSuggestions([]);
@@ -143,7 +127,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     }
   }
 
-<<<<<<< Updated upstream
   async function generateTaskSuggestions() {
     setLoadingTaskSuggestions(true);
     setTaskSuggestions([]);
@@ -157,8 +140,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
     }
   }
 
-=======
->>>>>>> Stashed changes
   async function startSession() {
     setLoading(true);
     setError('');
@@ -172,7 +153,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         id: uuidv4(),
         userId: user.id,
         goal: goal.trim(),
-        tasks: [], // tasks state remains, but always empty now as per removal of task entry
+        tasks: tasks,
         allowedSites: sites,
         whitelist: ['chrome://newtab', 'chrome://extensions', 'chrome://settings'],
         breaks: {
@@ -206,7 +187,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-black to-gray-900 text-white animate-fade-in overflow-hidden">
-      
       <div className="flex items-center gap-3 px-4 py-4 border-b border-red-500/30 shrink-0">
         <button
           onClick={step === 0 ? onBack : () => setStep(step - 1)}
@@ -223,10 +203,7 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
         </div>
       </div>
 
-      
       <div className="flex-1 overflow-y-auto px-4 py-4">
-
-        
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div>
@@ -298,7 +275,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -396,7 +372,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-        
         {step === 2 && (
           <div className="space-y-4 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -447,7 +422,6 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
           </div>
         )}
 
-
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
@@ -457,10 +431,19 @@ export default function StartSessionPage({ user, onBack, onSessionStart }) {
 
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                Tasks
+                Tasks ({tasks.length})
               </p>
-              {/* Removed tasks display, as tasks are no longer individually managed */}
-              <p className="text-sm text-gray-400">No specific tasks set. Goal is primary focus.</p>
+              {tasks.length === 0
+                ? <p className="text-sm text-gray-400">No specific tasks set.</p>
+                : <ul className="space-y-1">{tasks.map((t) => (
+                    <li key={t.id} className="flex items-center justify-between gap-2">
+                      <span className="text-sm text-white truncate flex-1">{t.description}</span>
+                      <button onClick={() => setTasks(tasks.filter(x => x.id !== t.id))} className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0">
+                        <X size={12} />
+                      </button>
+                    </li>
+                  ))}</ul>
+              }
             </div>
 
             <div className="bg-black/30 rounded-xl p-4 border border-red-500/30">
