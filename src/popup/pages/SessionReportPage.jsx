@@ -1,6 +1,6 @@
 import React from 'react';
-import { formatDuration, timeAgo } from '../../utils/helpers';
-import { Lock, AlertTriangle, Check, X } from 'lucide-react';
+import {formatDuration, timeAgo} from '../../utils/helpers';
+import {AlertTriangle, X} from 'lucide-react';
 
 function getDomain(url) {
   try { return new URL(url).hostname.replace(/^www\./, ''); }

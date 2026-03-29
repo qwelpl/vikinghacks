@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getCurrentUser } from '../utils/storage';
+import React, {useEffect, useRef, useState} from 'react';
+import {getCurrentUser} from '../utils/storage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
+import SessionReportPage from './pages/SessionReportPage'; // Import SessionReportPage
+import { Lock } from 'lucide-react'; // Import Lock icon
 
 export default function App() {
   const [user, setUser] = useState(null);
