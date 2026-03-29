@@ -6,7 +6,6 @@ import StartSessionPage from './pages/StartSessionPage';
 import ActiveSessionPage from './pages/ActiveSessionPage';
 import SettingsPage from './pages/SettingsPage';
 import SessionReportPage from './pages/SessionReportPage';
-import DashboardPage from './pages/DashboardPage'; // Import DashboardPage
 import {Lock} from 'lucide-react';
 
 export default function App() {
@@ -112,15 +111,6 @@ export default function App() {
     );
   }
 
-  if (page === 'dashboard') { // New dashboard page
-    return (
-      <DashboardPage
-        user={user}
-        onBack={() => navigateTo('home')}
-        onViewSession={handleViewSession} // Pass the new handler
-      />
-    );
-  }
 
   if (page === 'active' && session) {
     return (
@@ -144,12 +134,4 @@ export default function App() {
     );
   }
 
-  return (
-    <HomePage
-      user={user}
-      onStart={() => navigateTo('start')}
-      onSettings={() => navigateTo('settings')}
-      onDashboard={() => navigateTo('dashboard')} // Pass onDashboard prop
-    />
-  );
 }
